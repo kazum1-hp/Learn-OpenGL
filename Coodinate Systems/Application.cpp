@@ -1,5 +1,4 @@
 #include "Application.h"
-#include "glad/glad.h"
 
 Application::Application(const char* title)
 	: window(initWindow(title)), running(true)
