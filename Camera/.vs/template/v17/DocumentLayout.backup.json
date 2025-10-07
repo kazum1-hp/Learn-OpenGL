@@ -1,0 +1,311 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\cpp\\openGL\\Camera\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\Camera.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Camera.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\Camera.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Camera.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\Renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\GLUtils.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:GLUtils.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\GLUtils.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:GLUtils.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\Application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\Application.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Application.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\Mesh.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Mesh.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\Mesh.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Mesh.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\texture.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:texture.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\texture.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:texture.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\texture.vs||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:texture.vs||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Camera\\texture.fs||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:texture.fs||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "main.cpp",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\main.cpp",
+              "RelativeDocumentMoniker": "main.cpp",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\main.cpp",
+              "RelativeToolTip": "main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-16T21:31:28.006Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Camera.cpp",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Camera.cpp",
+              "RelativeDocumentMoniker": "Camera.cpp",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Camera.cpp",
+              "RelativeToolTip": "Camera.cpp",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAAAkAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-07T12:14:46.55Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Camera.h",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Camera.h",
+              "RelativeDocumentMoniker": "Camera.h",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Camera.h",
+              "RelativeToolTip": "Camera.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-10-07T12:14:32.024Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Application.h",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Application.h",
+              "RelativeDocumentMoniker": "Application.h",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Application.h",
+              "RelativeToolTip": "Application.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-10-06T13:26:05.831Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Application.cpp",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Application.cpp",
+              "RelativeDocumentMoniker": "Application.cpp",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Application.cpp",
+              "RelativeToolTip": "Application.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-06T13:29:15.889Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Renderer.h",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Renderer.h",
+              "RelativeDocumentMoniker": "Renderer.h",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Renderer.h",
+              "RelativeToolTip": "Renderer.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-10-06T13:10:25.085Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Renderer.cpp",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Renderer.cpp",
+              "RelativeDocumentMoniker": "Renderer.cpp",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Renderer.cpp",
+              "RelativeToolTip": "Renderer.cpp",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAUwF0AAABmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-06T13:13:38.735Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Mesh.h",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Mesh.h",
+              "RelativeDocumentMoniker": "Mesh.h",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Mesh.h",
+              "RelativeToolTip": "Mesh.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-10-06T12:47:43.317Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Mesh.cpp",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Mesh.cpp",
+              "RelativeDocumentMoniker": "Mesh.cpp",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Mesh.cpp",
+              "RelativeToolTip": "Mesh.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-06T12:51:33.916Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Texture.h",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Texture.h",
+              "RelativeDocumentMoniker": "Texture.h",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Texture.h",
+              "RelativeToolTip": "Texture.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-10-06T10:59:26.876Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Texture.cpp",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Texture.cpp",
+              "RelativeDocumentMoniker": "Texture.cpp",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Texture.cpp",
+              "RelativeToolTip": "Texture.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-06T10:58:51.275Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Shader.h",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Shader.h",
+              "RelativeDocumentMoniker": "Shader.h",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Shader.h",
+              "RelativeToolTip": "Shader.h",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABEAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-10-03T03:01:14.506Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Shader.cpp",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\Shader.cpp",
+              "RelativeDocumentMoniker": "Shader.cpp",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\Shader.cpp",
+              "RelativeToolTip": "Shader.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-03T02:44:16.948Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "GLUtils.h",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\GLUtils.h",
+              "RelativeDocumentMoniker": "GLUtils.h",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\GLUtils.h",
+              "RelativeToolTip": "GLUtils.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-16T21:30:46.306Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "GLUtils.cpp",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\GLUtils.cpp",
+              "RelativeDocumentMoniker": "GLUtils.cpp",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\GLUtils.cpp",
+              "RelativeToolTip": "GLUtils.cpp",
+              "ViewState": "AgIAADkAAAAAAAAAAAAAAEcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-16T21:31:07.493Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "texture.vs",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\texture.vs",
+              "RelativeDocumentMoniker": "texture.vs",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\texture.vs",
+              "RelativeToolTip": "texture.vs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-02T15:02:20.02Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "texture.fs",
+              "DocumentMoniker": "D:\\cpp\\openGL\\Camera\\texture.fs",
+              "RelativeDocumentMoniker": "texture.fs",
+              "ToolTip": "D:\\cpp\\openGL\\Camera\\texture.fs",
+              "RelativeToolTip": "texture.fs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-02T15:05:40.945Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
