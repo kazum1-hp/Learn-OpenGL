@@ -72,7 +72,7 @@ Mesh creatCube()
 Renderer::Renderer()
 	:shader("texture.vs", "texture.fs"),
 	mesh(creatCube()),
-	texture("evil.png")
+	texture("datou.png")
     /*camera()*/
 {
 	shader.use();

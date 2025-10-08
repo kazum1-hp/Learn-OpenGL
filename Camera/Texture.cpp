@@ -7,7 +7,7 @@
 Texture::Texture(const std::string& path, GLenum textureUnit)
 {
 	glGenTextures(1, &ID);
-	glActiveTexture(textureUnit);
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
 	glBindTexture(GL_TEXTURE_2D, ID);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
