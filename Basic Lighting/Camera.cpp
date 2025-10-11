@@ -1,7 +1,5 @@
 #include "Camera.h"
 
-Camera camera; // 定义全局摄像机
-
 Camera::Camera()
     : cameraPos(0.0f, 0.0f, 3.0f),
     cameraFront(0.0f, 0.0f, -1.0f),
@@ -24,7 +22,6 @@ void Camera::updateCameraVectors()
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
 {
-    float sensitivity = 0.04f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
@@ -44,11 +41,6 @@ void Camera::ProcessMouseScroll(float yoffset)
     fov -= yoffset;
     if (fov < 1.0f) fov = 1.0f;
     if (fov > 75.0f) fov = 75.0f;
-}
-
-glm::mat4 Camera::cameraView() const
-{
-    return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
 
 void Camera::MoveForward(float speed)

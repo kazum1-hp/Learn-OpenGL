@@ -1,9 +1,13 @@
 #include "Application.h"
 
 Application::Application(const char* title)
-	: window(initWindow(title)), running(true)
+	: camera(),
+	  window(title, camera),
+	  renderer(camera),
+	  input(camera),
+	  running(true)
 {
-	if (!window)
+	if (!window.getWindow())
 	{
 		running = false;
 		return;
@@ -14,8 +18,8 @@ void Application::run()
 {
 	if (!running) return;
 
-	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
+	while (!glfwWindowShouldClose(window.getWindow())) {
+		input.process(window.getWindow(), camera);
 
 		// Clear screen
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f); //custom color for screen clean
@@ -24,8 +28,10 @@ void Application::run()
 		renderer.render();
 
 		// Swap buffers and poll IO events
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(window.getWindow());
 		glfwPollEvents();
+
+		input.closeWindow(window.getWindow());
 	}
 }
 

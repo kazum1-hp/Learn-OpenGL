@@ -1,10 +1,11 @@
 D:\cmake\glad\src\glad.c;D:\cpp\openGL\Basic Lighting\template\x64\Debug\glad.obj
 D:\cpp\openGL\Basic Lighting\Application.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\Application.obj
 D:\cpp\openGL\Basic Lighting\Camera.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\Camera.obj
-D:\cpp\openGL\Basic Lighting\GLUtils.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\GLUtils.obj
+D:\cpp\openGL\Basic Lighting\InputManager.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\InputManager.obj
 D:\cpp\openGL\Basic Lighting\Light.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\Light.obj
 D:\cpp\openGL\Basic Lighting\main.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\main.obj
 D:\cpp\openGL\Basic Lighting\Mesh.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\Mesh.obj
 D:\cpp\openGL\Basic Lighting\Renderer.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\Renderer.obj
 D:\cpp\openGL\Basic Lighting\Shader.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\Shader.obj
 D:\cpp\openGL\Basic Lighting\Texture.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\Texture.obj
+D:\cpp\openGL\Basic Lighting\Window.cpp;D:\cpp\openGL\Basic Lighting\template\x64\Debug\Window.obj

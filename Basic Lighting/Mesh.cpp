@@ -1,8 +1,11 @@
 #include "Mesh.h"
 
-Mesh::Mesh(const std::vector<float>& vertices,
-		   const std::vector<VertexAttribute>& attributes)
+
+
+Mesh::Mesh(const Geometry& geometry)
 {
+	const auto& vertices = geometry.vertices;
+	const auto& attributes = geometry.attributes;
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);

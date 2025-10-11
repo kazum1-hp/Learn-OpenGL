@@ -1,21 +1,23 @@
 #pragma once
+#include "Window.h"
 #include "Shader.h"
+#include "Geometry.h"
 #include "Mesh.h"
 #include "Texture.h"
-#include "GLUtils.h"
 #include "Camera.h"
 #include "Light.h"
 
 class Renderer
 {
 private:
-	Shader shader;
+	Geometry geometry;
 	Mesh mesh;
 	Texture texture;
 	Light light;
-
+	Camera& camera;
+	Shader shader;
 public:
-	Renderer();
+	Renderer(Camera& cam);
 	void render();
 };
 

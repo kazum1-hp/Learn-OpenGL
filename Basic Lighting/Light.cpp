@@ -2,13 +2,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 Light::Light()
-	:color(glm::vec3(1.0f)),
-	 ambientStrength(0.1f)
+	:ambientStrength(0.1f),
+	 color(glm::vec3(1.0f)),
+	 position(glm::vec3(1.0f))
 {
 
-}
-
-glm::vec3 Light::getAmbient() const
-{
-	return ambientStrength * color;
 }

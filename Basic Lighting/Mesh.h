@@ -1,20 +1,11 @@
 #pragma once
-#include <glad/glad.h>
-#include <vector>
 
-struct VertexAttribute
-{
-	GLuint index;
-	GLint size;
-	GLenum type;
-	GLboolean normalized;
-};
+#include "Geometry.h"
 
 class Mesh
 {
 public:
-	Mesh(const std::vector<float>& vertices,
-		 const std::vector<VertexAttribute>& attributes);
+	Mesh(const Geometry& geometry);
 	~Mesh();
 
 	void draw() const;
