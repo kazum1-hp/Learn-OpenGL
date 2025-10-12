@@ -1,5 +1,4 @@
 #include "Light.h"
-#include <glm/gtc/matrix_transform.hpp>
 
 Light::Light()
 	:ambientStrength(0.1f),

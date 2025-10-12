@@ -2,7 +2,7 @@
 
 Application::Application(const char* title)
 	: camera(),
-	  window(title, camera),
+	  window(title, camera, input),
 	  renderer(camera),
 	  input(camera),
 	  running(true)

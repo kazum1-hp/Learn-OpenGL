@@ -6,7 +6,7 @@
 class Window
 {
 public:
-	Window(const char* title, Camera& cam, int width = 1920, int height = 1080);
+	Window(const char* title, Camera& cam, InputManager& input, int width = 1920, int height = 1080);
 	~Window();
 
 	GLFWwindow* getWindow() const {
@@ -23,7 +23,7 @@ private:
 	int SCR_WIDTH;
 	int SCR_HEIGHT;
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-	InputManager input;
+	InputManager& input;
 	Camera& camera;
 };
 

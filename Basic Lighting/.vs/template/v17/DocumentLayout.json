@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "D:\\cpp\\openGL\\Basic Lighting\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\InputManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:InputManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Window.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -15,47 +15,20 @@
       "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Window.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Camera.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Camera.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Application.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Application.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\InputManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:InputManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\InputManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:InputManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Camera.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Camera.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\CMAKE\\THIRDPARTYLIBS\\GLFW\\INCLUDE\\GLAD\\GLAD.H||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Application.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Application.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Mesh.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Mesh.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Texture.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Texture.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\texture.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -66,20 +39,16 @@
       "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Mesh.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\texture.fs||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:texture.fs||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\texture.vs||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:texture.vs||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Light.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Light.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Camera.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Camera.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Light.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -90,8 +59,36 @@
       "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Geometry.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:shader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Texture.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Texture.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Light.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Light.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Camera.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Camera.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\Mesh.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:Mesh.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:shader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\texture.fs||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:texture.fs||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|D:\\cpp\\openGL\\Basic Lighting\\texture.vs||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{F245158C-A221-4AFC-9903-D17061953C4F}|template.vcxproj|solutionrelative:texture.vs||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -101,7 +98,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 21,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Bookmark",
@@ -109,20 +106,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "glad.h",
-              "DocumentMoniker": "D:\\cmake\\ThirdPartyLibs\\GLFW\\include\\glad\\glad.h",
-              "RelativeDocumentMoniker": "..\\..\\..\\cmake\\ThirdPartyLibs\\GLFW\\include\\glad\\glad.h",
-              "ToolTip": "D:\\cmake\\ThirdPartyLibs\\GLFW\\include\\glad\\glad.h",
-              "RelativeToolTip": "..\\..\\..\\cmake\\ThirdPartyLibs\\GLFW\\include\\glad\\glad.h",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAEwBoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-10-11T16:30:41.957Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 14,
               "Title": "main.cpp",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\main.cpp",
               "RelativeDocumentMoniker": "main.cpp",
@@ -135,7 +119,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 13,
               "Title": "Geometry.h",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Geometry.h",
               "RelativeDocumentMoniker": "Geometry.h",
@@ -148,33 +132,32 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 12,
               "Title": "Light.h",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Light.h",
               "RelativeDocumentMoniker": "Light.h",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Light.h",
               "RelativeToolTip": "Light.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAACAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-10-08T13:48:33.544Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 16,
               "Title": "Light.cpp",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Light.cpp",
               "RelativeDocumentMoniker": "Light.cpp",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Light.cpp",
               "RelativeToolTip": "Light.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAbAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-10-08T14:45:51.56Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-08T14:45:51.56Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 11,
               "Title": "Camera.h",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Camera.h",
               "RelativeDocumentMoniker": "Camera.h",
@@ -187,72 +170,71 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 17,
               "Title": "Camera.cpp",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Camera.cpp",
               "RelativeDocumentMoniker": "Camera.cpp",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Camera.cpp",
               "RelativeToolTip": "Camera.cpp",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAmwCYAAAAfAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-10-07T12:14:46.55Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-07T12:14:46.55Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 3,
               "Title": "Application.h",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Application.h",
               "RelativeDocumentMoniker": "Application.h",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Application.h",
               "RelativeToolTip": "Application.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAUAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-10-06T13:26:05.831Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 0,
               "Title": "Application.cpp",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Application.cpp",
               "RelativeDocumentMoniker": "Application.cpp",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Application.cpp",
               "RelativeToolTip": "Application.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAACAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-10-06T13:29:15.889Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 10,
               "Title": "Renderer.h",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Renderer.h",
               "RelativeDocumentMoniker": "Renderer.h",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Renderer.h",
               "RelativeToolTip": "Renderer.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-10-06T13:10:25.085Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 9,
               "Title": "Renderer.cpp",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Renderer.cpp",
               "RelativeDocumentMoniker": "Renderer.cpp",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Renderer.cpp",
               "RelativeToolTip": "Renderer.cpp",
-              "ViewState": "AgIAADwAAAAAAAAAAAAAAEoAAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAAABEAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-10-06T13:13:38.735Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 8,
               "Title": "Mesh.h",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Mesh.h",
               "RelativeDocumentMoniker": "Mesh.h",
@@ -265,7 +247,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 18,
               "Title": "Mesh.cpp",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Mesh.cpp",
               "RelativeDocumentMoniker": "Mesh.cpp",
@@ -273,51 +255,49 @@
               "RelativeToolTip": "Mesh.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-10-06T12:51:33.916Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-06T12:51:33.916Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 7,
               "Title": "Texture.h",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Texture.h",
               "RelativeDocumentMoniker": "Texture.h",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Texture.h",
               "RelativeToolTip": "Texture.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-10-06T10:59:26.876Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 15,
               "Title": "Texture.cpp",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Texture.cpp",
               "RelativeDocumentMoniker": "Texture.cpp",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Texture.cpp",
               "RelativeToolTip": "Texture.cpp",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-10-06T10:58:51.275Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-06T10:58:51.275Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 6,
               "Title": "Shader.h",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Shader.h",
               "RelativeDocumentMoniker": "Shader.h",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Shader.h",
               "RelativeToolTip": "Shader.h",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA0AAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-10-03T03:01:14.506Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "Shader.cpp",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\Shader.cpp",
               "RelativeDocumentMoniker": "Shader.cpp",
@@ -325,8 +305,7 @@
               "RelativeToolTip": "Shader.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-10-03T02:44:16.948Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-03T02:44:16.948Z"
             },
             {
               "$type": "Document",
@@ -336,7 +315,7 @@
               "RelativeDocumentMoniker": "Window.h",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Window.h",
               "RelativeToolTip": "Window.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-10-10T13:23:29.899Z",
               "EditorCaption": ""
@@ -349,40 +328,40 @@
               "RelativeDocumentMoniker": "Window.cpp",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\Window.cpp",
               "RelativeToolTip": "Window.cpp",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAAAB0AAABDAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-10-10T13:29:13.857Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "InputManager.h",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\InputManager.h",
               "RelativeDocumentMoniker": "InputManager.h",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\InputManager.h",
               "RelativeToolTip": "InputManager.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-10-10T13:23:44.98Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
               "Title": "InputManager.cpp",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\InputManager.cpp",
               "RelativeDocumentMoniker": "InputManager.cpp",
               "ToolTip": "D:\\cpp\\openGL\\Basic Lighting\\InputManager.cpp",
               "RelativeToolTip": "InputManager.cpp",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAABUAAAAyAAAAAAAAAA==",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAABUAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-10-10T13:44:52.492Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 21,
               "Title": "texture.vs",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\texture.vs",
               "RelativeDocumentMoniker": "texture.vs",
@@ -390,12 +369,11 @@
               "RelativeToolTip": "texture.vs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA7AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-10-02T15:02:20.02Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-02T15:02:20.02Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 20,
               "Title": "texture.fs",
               "DocumentMoniker": "D:\\cpp\\openGL\\Basic Lighting\\texture.fs",
               "RelativeDocumentMoniker": "texture.fs",
@@ -403,8 +381,7 @@
               "RelativeToolTip": "texture.fs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAABYAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-10-10T13:11:31.751Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-10T13:11:31.751Z"
             }
           ]
         }

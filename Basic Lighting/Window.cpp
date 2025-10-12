@@ -2,8 +2,8 @@
 #include <iostream>
 
 
-Window::Window(const char* title, Camera& cam, int width, int height)
-	:camera(cam), input(cam), SCR_WIDTH(width), SCR_HEIGHT(height)
+Window::Window(const char* title, Camera& cam, InputManager& inputManager, int width, int height)
+	:camera(cam), input(inputManager), SCR_WIDTH(width), SCR_HEIGHT(height)
 {
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW." << std::endl;

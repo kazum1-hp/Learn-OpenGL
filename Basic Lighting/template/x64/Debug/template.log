@@ -1,2 +1,6 @@
-﻿  InputManager.cpp
+﻿  Application.cpp
+  InputManager.cpp
+  Window.cpp
+  main.cpp
+  正在生成代码...
   template.vcxproj -> D:\cpp\openGL\Basic Lighting\x64\Debug\template.exe
