@@ -70,7 +70,7 @@ std::vector<VertexAttribute> attr = {
 Renderer::Renderer(Camera& cam)
     :geometry(object, attr), 
      mesh(geometry),
-	 texture("ei.png"),
+	 texture("mm.png"),
      light(),
      camera(cam),
      shader("texture.vs", "texture.fs")
@@ -96,7 +96,7 @@ void Renderer::render()
         glm::mat4 model;
       /*  model = glm::translate(model, cubePositions[i]);
         float angle = 20.0f * (10 - i);*/
-        model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.3f, 0.5f));
+        model = glm::rotate(model, glm::radians(30.0f * (float)(2.0f* glfwGetTime())), glm::vec3(1.0f, 0.3f, 0.5f));
         shader.setUniform("model", model);
         glm::mat3 normalMatrix = glm::transpose(glm::inverse(model));
         shader.setUniform("normalMatrix", normalMatrix);
