@@ -1,0 +1,19 @@
+# VS generated files
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.user
+*.aps
+*.ncb
+.vs/
+Debug/
+Release/
+x64/
+x86/
+
+# Build artifacts
+*.obj
+*.pdb
+*.exe
+*.dll
+*.lib
