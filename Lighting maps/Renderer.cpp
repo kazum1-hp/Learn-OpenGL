@@ -93,8 +93,6 @@ Renderer::Renderer(Camera& cam)
 
 void Renderer::render()
 {
-    light.setLightPos(glm::vec3(1.2f * sin(glfwGetTime()), 1.0f * sin(glfwGetTime()), 2.0f));
-
     shader.use();
 
     texture.bind(); 
@@ -102,16 +100,17 @@ void Renderer::render()
 
     shader.setUniform("view", camera.getViewMatrix());
     shader.setUniform("projection", camera.getProjectionMatrix());
+    shader.setUniform("viewPos", camera.getPosition());
 
+    light.setLightPos(glm::vec3(1.2f * sin(glfwGetTime()), 1.0f * sin(glfwGetTime()), 2.0f));
     light.update();
     shader.setUniform("light.color", light.getColor());
     shader.setUniform("light.position", light.getLightPos());
-    shader.setUniform("viewPos", camera.getPosition());
 
     glm::mat4 model;
-
     model = glm::rotate(model, glm::radians(0.0f ), glm::vec3(1.0f, 0.3f, 0.5f));
     shader.setUniform("model", model);
+
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(model));
     shader.setUniform("normalMatrix", normalMatrix);
 
