@@ -20,18 +20,18 @@ void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	}
 
 	float xoffset = static_cast<float>(xpos - lastX);
-	float yoffset = static_cast<float>(lastY - ypos); // y轴反向
+	float yoffset = static_cast<float>(lastY - ypos); // y-axis reverse
 	lastX = static_cast<float>(xpos);
 	lastY = static_cast<float>(ypos);
 
-	// 获取 Window 实例
+	// Get a Window instance
 	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (!win) {
 		std::cerr << "Failed to get Window pointer in scroll_callback" << std::endl;
 		return;
 	}
 
-	// 通过 Window 获取 InputManager
+	// Get InputManager through Window
 	InputManager& input = win->getInput();
 	input.camera.ProcessMouseMovement(xoffset, yoffset);
 	
@@ -45,12 +45,12 @@ void InputManager::scroll_callback(GLFWwindow* window, double xoffset, double yo
 		return;
 	}
 
-	// 通过 Window 获取 InputManager
+	// Get InputManager through Window
 	InputManager& input = win->getInput();
 	input.camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-void InputManager::process(GLFWwindow* window, Camera& camera, float deltaTime)
+void InputManager::moveControl(GLFWwindow* window, Camera& camera, float deltaTime)
 {
 	static float lastFrame = 0.0f;
 

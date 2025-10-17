@@ -29,7 +29,7 @@ Window::Window(const char* title, Camera& cam, InputManager& inputManager, int w
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, cursor_position_callback);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // 捕获鼠标
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Mouse Capture
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// --- depth test ---
@@ -50,7 +50,7 @@ void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height
 	{
 		win -> SCR_WIDTH = width;
 		win -> SCR_HEIGHT = height;
-		// 更新 camera 宽高比
+		// Update camera aspect ratio
 		win -> camera.aspect = (float)width / (float)height;
 	}
 }

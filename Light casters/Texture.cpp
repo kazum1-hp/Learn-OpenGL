@@ -16,10 +16,10 @@ Texture::Texture(const std::string& path, int textureUnit)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	//宽度，高度，颜色通道的个数
+	// Number of Width, height and Color channels
 	int width, height, nrChannels;
 
-	//上下翻转
+	// Flip upside down
 	stbi_set_flip_vertically_on_load(true);
 
 	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);

@@ -11,7 +11,7 @@ public:
 
 	static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-	void process(GLFWwindow* window, Camera& camera, float deltaTime = 0.0f);
+	void moveControl(GLFWwindow* window, Camera& camera, float deltaTime = 0.0f);
 	void lightControl(GLFWwindow* window);
 	void closeWindow(GLFWwindow* window);
 

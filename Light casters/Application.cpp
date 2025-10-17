@@ -19,7 +19,7 @@ void Application::run()
 	if (!running) return;
 
 	while (!glfwWindowShouldClose(window.getWindow())) {
-		input.process(window.getWindow(), camera);
+		input.moveControl(window.getWindow(), camera);
 		input.lightControl(window.getWindow());
 
 		// Clear screen

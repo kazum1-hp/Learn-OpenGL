@@ -70,12 +70,16 @@ std::vector<VertexAttribute> attr = {
 Renderer::Renderer(Camera& cam, InputManager& input)
     :geometry(object, attr),
      mesh(geometry),
+    /* textureVec{Texture("Assets/ei.png", 0), Texture("Assets/container2_specular.png", 1) },*/
      light(),
      camera(cam),
      input(input),
      shader("light.vs", "light.fs"),
      material()
 {
+    textureVec.emplace_back("Assets/container2.png", 0);
+    textureVec.emplace_back("Assets/container2_specular.png", 1);
+
     shader.use();
 
     shader.setUniform("material.diffuse", 0);
@@ -97,8 +101,8 @@ Renderer::Renderer(Camera& cam, InputManager& input)
     shader.setUniform("spotLight.diffuse", light.getDiffuse());
     shader.setUniform("spotLight.specular", light.getSpecular());
 
-    textureVec.push_back(std::make_shared<Texture>("Assets/container2.png", 0));
-    textureVec.push_back(std::make_shared<Texture>("Assets/container2_specular.png", 1));
+    /*textureVec.push_back(std::make_shared<Texture>("Assets/ei.png", 0));
+    textureVec.push_back(std::make_shared<Texture>("Assets/container2_specular.png", 1));*/
 }
 
 void Renderer::render()
@@ -110,7 +114,7 @@ void Renderer::render()
     shader.setUniform("spotLight.enabled", input.spotLightOn);
 
     for (auto& tex : textureVec) {
-        tex -> bind();
+        tex.bind();
     }
 
     shader.setUniform("view", camera.getViewMatrix());

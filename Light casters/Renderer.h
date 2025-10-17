@@ -17,7 +17,7 @@ private:
 	Mesh mesh;
 	/*Texture texture;
 	Texture texture2;*/
-	std::vector<std::shared_ptr<Texture>> textureVec;
+	std::vector<Texture> textureVec;
 	Light light;
 	Camera& camera;
 	InputManager& input;
