@@ -77,7 +77,7 @@ Renderer::Renderer(Camera& cam, InputManager& input)
      shader("light.vs", "light.fs"),
      material()
 {
-    textureVec.emplace_back("Assets/container2.png", 0);
+    textureVec.emplace_back("Assets/ei.png", 0);
     textureVec.emplace_back("Assets/container2_specular.png", 1);
 
     shader.use();
