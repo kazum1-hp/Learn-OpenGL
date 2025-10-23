@@ -1,0 +1,64 @@
+#define STB_IMAGE_IMPLEMENTATION 
+#include "stb_image.h"
+
+#include "Texture.h"
+#include <iostream>
+
+Texture::Texture(const std::string& path, int textureUnit, const std::string& typeName)
+	:unit(textureUnit), type(typeName)
+{
+	glGenTextures(1, &ID);
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(GL_TEXTURE_2D, ID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Number of Width, height and Color channels
+	int width, height, nrChannels;
+
+	// Flip upside down
+	stbi_set_flip_vertically_on_load(true);
+
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+
+	if (data)
+	{
+		if (nrChannels == 3)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		}
+
+		else if (nrChannels == 4)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		}
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	stbi_image_free(data);
+
+	std::cout << "Loading texture: " << path << std::endl;
+	std::cout << "Size: " << width << "x" << height << ", Channels: " << nrChannels << std::endl;
+
+
+}
+
+void Texture::bind() const
+{
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(GL_TEXTURE_2D, ID);
+}
+
+Texture::~Texture()
+{
+	glDeleteTextures(1, &ID);
+}
