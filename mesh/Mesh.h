@@ -18,6 +18,10 @@ public:
 	std::vector<std::shared_ptr<Texture>> textures;
 
 	GLuint getVAO() const { return VAO; }
+	void addTexture(const std::shared_ptr<Texture>& texture) {
+		textures.push_back(texture);
+	}
+
 
 private:
 	GLuint VAO, VBO, EBO;

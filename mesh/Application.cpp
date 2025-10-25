@@ -4,7 +4,7 @@ Application::Application(const char* title)
 	: camera(),
 	  window(title, camera, input),  
 	  input(camera),
-	  renderer(camera, input, "Assets/backpack/backpack.obj"),
+	  renderer(camera, input, { "Assets/raiden/raiden.pmx" }),
 	  running(true)
 {
 	if (!window.getWindow())

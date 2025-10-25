@@ -56,6 +56,7 @@ uniform SpotLight spotLight;
  
 uniform vec3 viewPos;
 
+
 vec3 CalParallelLight(ParallelLight parallelLight, vec3 norm, vec3 viewDir);
 vec3 CalPointLight(PointLight pointLight, vec3 norm, vec3 viewDir);
 vec3 CalSpotLight(SpotLight spotLight, vec3 norm, vec3 viewDir);
@@ -66,8 +67,10 @@ void main()
 	vec3 viewDir = normalize(viewPos - FragPos);
 	
 	// result
-	vec3 baseColor = vec3(texture(material.diffuse, TexCoord));
-	vec3 result = baseColor;
+	vec3 baseDiffuse = vec3(texture(material.diffuse, TexCoord));
+	vec3 baseSpecular = vec3(texture(material.specular, TexCoord));
+
+	vec3 result = baseDiffuse + baseSpecular;
 
 	result += CalParallelLight(parallelLight, norm, viewDir) +CalPointLight(pointLight, norm, viewDir) + CalSpotLight(spotLight, norm, viewDir);
 

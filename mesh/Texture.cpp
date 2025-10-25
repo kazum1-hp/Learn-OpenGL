@@ -1,8 +1,15 @@
-#define STB_IMAGE_IMPLEMENTATION 
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_NO_STDIO   // forbide stb_image use fopen
 #include "stb_image.h"
 
 #include "Texture.h"
 #include <iostream>
+#ifdef APIENTRY
+#undef APIENTRY
+#endif
+#include <windows.h> // for MultiByteToWideChar
+#include <fstream>
+#include <vector>
 
 Texture::Texture(const std::string& path, int textureUnit, const std::string& typeName)
 	:unit(textureUnit), type(typeName)
@@ -20,9 +27,35 @@ Texture::Texture(const std::string& path, int textureUnit, const std::string& ty
 	int width, height, nrChannels;
 
 	// Flip upside down
-	stbi_set_flip_vertically_on_load(true);
+	//stbi_set_flip_vertically_on_load(true);
 
-	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+	// UTF-8 -> UTF-16
+	int wlen = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, nullptr, 0);
+	std::wstring wpath(wlen, L'\0');
+	MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, &wpath[0], wlen);
+	std::wcout.imbue(std::locale(""));
+	std::wcout << L"[Texture] Trying to load: " << wpath << std::endl;
+
+	// read file to memory by using ifstream
+	std::ifstream file(wpath, std::ios::binary | std::ios::ate);
+	if (!file) {
+		std::cout << "Failed to open texture file: " << path << std::endl;
+		return;
+	}
+
+	std::streamsize size = file.tellg();
+	file.seekg(0, std::ios::beg);
+	std::vector<unsigned char> buffer(size);
+	if (!file.read((char*)buffer.data(), size)) {
+		std::cout << "Failed to read texture file: " << path << std::endl;
+		return;
+	}
+
+	// load from memory
+	unsigned char* data = stbi_load_from_memory(buffer.data(), (int)size, &width, &height, &nrChannels, 0);
+
+
+	/*unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);*/
 
 	if (data)
 	{
@@ -37,6 +70,9 @@ Texture::Texture(const std::string& path, int textureUnit, const std::string& ty
 		}
 
 		glGenerateMipmap(GL_TEXTURE_2D);
+
+		std::cout << "Loading texture: " << path << std::endl;
+		std::cout << "Size: " << width << "x" << height << ", Channels: " << nrChannels << std::endl;
 	}
 
 	else
@@ -45,11 +81,6 @@ Texture::Texture(const std::string& path, int textureUnit, const std::string& ty
 	}
 
 	stbi_image_free(data);
-
-	std::cout << "Loading texture: " << path << std::endl;
-	std::cout << "Size: " << width << "x" << height << ", Channels: " << nrChannels << std::endl;
-
-
 }
 
 void Texture::bind() const

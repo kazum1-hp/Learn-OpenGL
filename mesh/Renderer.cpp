@@ -2,14 +2,15 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-Renderer::Renderer(Camera& cam, InputManager& input, const std::string& modelPath)
-    :myModel(modelPath),
-     camera(cam),
+Renderer::Renderer(Camera& cam, InputManager& input, const std::vector<std::string>& modelPaths)
+    :camera(cam),
      input(input),
      shader("light.vs", "light.fs"),
      material()
 {
-    std::cout << "Creating renderer, GL version: " << glGetString(GL_VERSION) << std::endl;
+    for (const auto& path : modelPaths) {
+        models.push_back(std::make_unique<Model>(path));
+    }
 
     shader.use();
 
@@ -28,7 +29,7 @@ Renderer::Renderer(Camera& cam, InputManager& input, const std::string& modelPat
     shader.setUniform("pointLight.linear", 0.09f);
     shader.setUniform("pointLight.quadratic", 0.032f);
 
-    //shader.setUniform("spotLight.ambient", light.getAmbient());
+    shader.setUniform("spotLight.ambient", light.getAmbient());
     shader.setUniform("spotLight.diffuse", light.getDiffuse());
     shader.setUniform("spotLight.specular", light.getSpecular());
 
@@ -38,7 +39,6 @@ void Renderer::render()
 {
     std::cout << "Rendering frame..." << std::endl;
     std::cout << "Shader ID: " << shader.ID << std::endl;
-
 
     shader.use();
 
@@ -61,13 +61,6 @@ void Renderer::render()
     shader.setUniform("spotLight.cutOff", glm::cos(glm::radians(5.5f)));
     shader.setUniform("spotLight.outerCutOff", glm::cos(glm::radians(7.5f)));
 
-    if (!myModel.textures.empty())
-    {
-        myModel.textures[0]->bind(); // diffuse
-        if (myModel.textures.size() > 1)
-            myModel.textures[1]->bind(); // specular
-    }
-
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
     shader.setUniform("model", model);
@@ -81,7 +74,20 @@ void Renderer::render()
 
     shader.setUniform("normalMatrix", normalMatrix);
 
-    myModel.draw();
+    for (const auto& modelPtr : models)
+    {
+        Model& model = *modelPtr;
+
+        if (!model.textures.empty())
+        {
+            model.textures[0]->bind(); // diffuse
+            if (model.textures.size() > 1)
+                model.textures[1]->bind(); // specular
+        }
+
+        model.draw();
+    }
+
     std::cout << "Draw call executed" << std::endl;
 
 }

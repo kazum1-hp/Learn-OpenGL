@@ -14,7 +14,6 @@ void Model::draw() const
 		std::cout << "Drawing mesh[" << i << "] VAO=" << meshes[i]->getVAO() << std::endl;
 		meshes[i]->draw();
 	}
-
 }
 
 void Model::loadModel(const std::string& path)
@@ -35,7 +34,6 @@ void Model::loadModel(const std::string& path)
 	for (unsigned int i = 0; i < scene->mNumMeshes; i++)
 	{
 		meshes.push_back(processMesh(scene->mMeshes[i], scene));
-
 	}
 
 	std::cout << "Model loaded: " << path << std::endl;
@@ -100,13 +98,9 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	// ´´½¨ Mesh
 	return std::make_unique<Mesh>(geometry, meshTextures);
 
-	//Mesh resultMesh(geometry, textures);
-
 	//// TODO: Loading MaterialTextures
 	//// aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 	//// auto textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-
-	//return resultMesh;
 }
 
 std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName)
@@ -118,6 +112,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
 		mat->GetTexture(type, i, &str);
 
 		std::string path = directory + "/" + str.C_Str();
+		//std::cout << "[Assimp] Found texture: " << path << " | Type: " << typeName << std::endl;
 
 		if (loadedTextures.find(path) == loadedTextures.end()) 
 		{

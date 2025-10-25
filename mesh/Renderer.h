@@ -11,7 +11,7 @@
 class Renderer
 {
 private:
-	Model myModel;
+	std::vector<std::unique_ptr<Model>> models;
 	//std::vector<std::shared_ptr<Texture>> textureVec;
 	Light light;
 	Camera& camera;
@@ -19,7 +19,7 @@ private:
 	Shader shader;
 	Material material;
 public:
-	Renderer(Camera& cam, InputManager& input, const std::string& modelPath);
+	Renderer(Camera& cam, InputManager& input, const std::vector<std::string>& modelPaths);
 	void render();
 };
 

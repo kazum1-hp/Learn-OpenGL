@@ -58,7 +58,7 @@ void InputManager::moveControl(GLFWwindow* window, Camera& camera, float deltaTi
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 
-	float speed = 5.0f * deltaTime;
+	float speed = 25.0f * deltaTime;
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.MoveForward(speed);
