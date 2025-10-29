@@ -4,7 +4,7 @@ Application::Application(const char* title)
 	: camera(),
 	  window(title, camera, input),  
 	  input(camera),
-	  renderer(camera, input, { "Assets/fd/fd.pmx" }),
+	  renderer(camera, input, { "Assets/raiden/raiden.pmx", "Assets/mirror/mirror.obj"}),
 	  running(true)
 {
 	if (!window.getWindow())
