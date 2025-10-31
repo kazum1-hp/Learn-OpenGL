@@ -1,0 +1,9 @@
+[Info]
+Version = 3
+
+[Effect]
+Obj = SJ_Skybox.fx
+Obj[1] = SJ_Cloud01.fx
+Obj[2] = SJ_Cloud02.fx
+Obj[3] = SJ_Cloud03.fx
+
