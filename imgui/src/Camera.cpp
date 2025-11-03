@@ -1,7 +1,7 @@
 #include "../head/Camera.h"
 
 Camera::Camera()
-    : cameraPos(0.0f, 17.0f, 10.0f),
+    : cameraPos(0.0f, 100.0f, 10.0f),
     cameraFront(0.0f, 0.0f, -1.0f),
     cameraUp(0.0f, 1.0f, 0.0f),
     yaw(-90.f),

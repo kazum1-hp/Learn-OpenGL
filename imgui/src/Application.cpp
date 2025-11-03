@@ -7,7 +7,7 @@ Application::Application(const char* title)
 	: camera(),
 	  window(title, camera, input),  
 	  input(camera),
-	  renderer(camera, input, { "../Assets/ina/ina.pmx"}),
+	  renderer(camera, input, window, { "../Assets/ina/ina.pmx"}),
 	  running(true)
 {
 	if (!window.getWindow())
@@ -54,7 +54,7 @@ void Application::run()
 		ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 		renderer.onImGuiRender();
-
+		
 		ImGui::End();
 
 		// render ImGui

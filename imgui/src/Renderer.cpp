@@ -21,18 +21,19 @@ std::vector<VertexAttribute> attributes = {
 };
 
 const std::vector<std::string> faces = {
-    ("../Assets/skybox/right.jpg"),
-    ("../Assets/skybox/left.jpg"),
-    ("../Assets/skybox/top.jpg"),
-    ("../Assets/skybox/bottom.jpg"),
-    ("../Assets/skybox/front.jpg"),
-    ("../Assets/skybox/back.jpg")
+    ("../Assets/genshin1/px.png"),
+    ("../Assets/genshin1/nx.png"),
+    ("../Assets/genshin1/py.png"),
+    ("../Assets/genshin1/ny.png"),
+    ("../Assets/genshin1/pz.png"),
+    ("../Assets/genshin1/nz.png")
 };
 
-Renderer::Renderer(Camera& cam, InputManager& input, const std::vector<std::string>& modelPaths)
+Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vector<std::string>& modelPaths)
     :skybox(faces),
      camera(cam),
-     input(input)
+     input(input),
+     window(win)
 {
     for (const auto& path : modelPaths) {
         models.push_back(std::make_unique<Model>(path));
@@ -151,7 +152,7 @@ void Renderer::render()
     framebufferShader.setUniform("effectMode", effectMode);
     framebufferShader.setUniform("offset", offset);
     framebufferShader.setUniform("screenTexture", 0);
-
+    framebufferShader.setUniform("scanPos", scanPos);
     meshes[0] -> draw();
 
     glEnable(GL_DEPTH_TEST); 
@@ -161,8 +162,12 @@ void Renderer::onImGuiRender()
 {
     light.onImGuiRender();
     ImGui::Combo("Effect Mode", &effectMode, "normal\0inversion\0grayscale\0sharpen\0blur\0\0");
-    ImGui::SliderFloat("Offset", &offset, 100.0f, 1000.0f);
+    if (effectMode == 3 || effectMode == 4)
+    {
+        ImGui::SliderFloat("Offset", &offset, 100.0f, 1000.0f);
+    }
     ImGui::SliderFloat("Skybox Light", &skyboxLight, 0.1f, 1.0f);
     ImGui::SliderFloat("Model Light", &modelLight, 0.1f, 1.0f);
+    ImGui::SliderFloat("Scan Pos", &scanPos, 0.0f, window.getWidth());
     input.onImGuiRender();
 }
