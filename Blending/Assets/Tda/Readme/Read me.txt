@@ -1,9 +1,0 @@
-[rules]
-credit me [@ DarthSky]
-edit is allowed
-don't claim as yours
-don't redistribute original texture data
-
-
-(c) DarthSky.
-2k18.
