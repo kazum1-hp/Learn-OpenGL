@@ -17,3 +17,6 @@ x86/
 *.exe
 *.dll
 *.lib
+
+# 忽略 Assets 文件夹及其所有内容
+Assets/
