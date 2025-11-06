@@ -41,7 +41,7 @@ void main()
             sampleTex[i] = texture(screenTexture, TexCoords.st + offsets[i]).rgb;
         }
 
- if (gl_FragCoord.x < scanPos)
+ if (gl_FragCoord.x > scanPos)
     {
         if (effectMode == 0) { color = texture(screenTexture, TexCoords).rgb; }
 
@@ -68,6 +68,6 @@ void main()
         FragColor = vec4(color, 1.0);
     }
         
- else
-    FragColor = vec4(texture(screenTexture, TexCoords).rgb, 1.0);
+    else
+        FragColor = vec4(texture(screenTexture, TexCoords).rgb, 1.0);
 }

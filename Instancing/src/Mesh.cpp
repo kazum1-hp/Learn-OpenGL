@@ -76,8 +76,10 @@ void Mesh::setInstanceTransforms(const std::vector<glm::mat4>& transforms)
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-	glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), transforms.data(), GL_STATIC_DRAW);
 
+	size_t byteSize = transforms.size() * sizeof(glm::mat4);
+	glBufferData(GL_ARRAY_BUFFER, byteSize, nullptr, GL_DYNAMIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, byteSize, transforms.data());
 
 	GLuint startLocation = 0;
 	if (!attributes.empty())
@@ -102,4 +104,5 @@ Mesh::~Mesh()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
+	if (instanceVBO != 0) glDeleteBuffers(1, &instanceVBO);
 }

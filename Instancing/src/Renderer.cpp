@@ -21,12 +21,12 @@ std::vector<VertexAttribute> attributes = {
 };
 
 const std::vector<std::string> faces = {
-    ("../Assets/genshin1/px.png"),
-    ("../Assets/genshin1/nx.png"),
-    ("../Assets/genshin1/py.png"),
-    ("../Assets/genshin1/ny.png"),
-    ("../Assets/genshin1/pz.png"),
-    ("../Assets/genshin1/nz.png")
+    ("../Assets/skybox2/1.png"),
+    ("../Assets/skybox2/3.png"),
+    ("../Assets/skybox2/5.png"),
+    ("../Assets/skybox2/6.png"),
+    ("../Assets/skybox2/2.png"),
+    ("../Assets/skybox2/4.png")
 };
 
 Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vector<std::string>& modelPaths)
@@ -39,8 +39,10 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
         models.push_back(std::make_unique<Model>(path));
     }
 
-    Framebuffers.push_back(std::make_unique<FrameBuffer>());
-    FrameBuffer& sceneFrameBuffer = *Framebuffers[0];
+    Framebuffers.push_back(std::make_unique<FrameBuffer>(window, true, false));
+    Framebuffers.push_back(std::make_unique<FrameBuffer>(window, false, false));
+    FrameBuffer& msFrameBuffer = *Framebuffers[0];
+    FrameBuffer& sceneFrameBuffer = *Framebuffers[1];
 
     geometrys.push_back(std::make_unique<Geometry>(quadVertices, indices, attributes));
     Geometry& scene = *geometrys[0];
@@ -84,16 +86,18 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
     instanceShader.setUniform("material.specular", 1);
     instanceShader.setUniform("material.shininess", material.getShininess());
 
-    // --- depth test ---
+    // --- glEnable ---
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_MULTISAMPLE);
 }
 
 void Renderer::render()
 {
-    FrameBuffer& sceneFrameBuffer = *Framebuffers[0];
-    glBindFramebuffer(GL_FRAMEBUFFER, sceneFrameBuffer.getFBO());
+    FrameBuffer& msFrameBuffer = *Framebuffers[0];
+    FrameBuffer& sceneFrameBuffer = *Framebuffers[1];
+    glBindFramebuffer(GL_FRAMEBUFFER, msFrameBuffer.getFBO());
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -110,7 +114,7 @@ void Renderer::render()
     skybox.draw();
     glDepthFunc(GL_LESS);
 
-    Model& model = *models[0];
+    Model& rock = *models[0];
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -20.0f));
@@ -159,7 +163,7 @@ void Renderer::render()
         shader.setUniform("normalMatrix", normalMatrix);
         shader.setUniform("modelLight", modelLight);
 
-        model.draw();
+        rock.draw();
     }
     else 
     {
@@ -171,20 +175,48 @@ void Renderer::render()
         glm::mat4 projection = camera.getProjectionMatrix();
 
         std::vector<glm::mat4> transforms;
-
-        for (unsigned int i = 0; i < instance; i++)
+        //srand(glfwGetTime());
+        float radius = 50.0;
+        float offset = 2.5f;
+        for (int i = 0; i < instance; i++)
         {
-            float x = (i % 10) * 20.0f;
-            float y = (i / 10) * 20.0f;
+            float angle = (float)i / (float)instance * 360.0f;
+            float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+            float x = sin(angle) * radius + displacement;
+            displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+            float y = displacement * 0.4f; // 让行星带的高度比x和z的宽度要小
+            displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+            float z = cos(angle) * radius + displacement;
+            glm::mat4 model = glm::translate(modelMatrix, glm::vec3(x, y, z));
 
-            glm::mat4 model = glm::translate(modelMatrix, glm::vec3(x, y, 0.0f));
+            // 2. 缩放：在 0.05 和 0.25f 之间缩放
+            float scale = (rand() % 20) / 100.0f + 0.05f;
+            model = glm::scale(model, glm::vec3(scale));
+
+            // 3. 旋转：绕着一个（半）随机选择的旋转轴向量进行随机的旋转
+            float rotAngle = static_cast<float>(rand() % 360);
+            model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
+
+            //glm::mat4 model = glm::translate(modelMatrix, glm::vec3(x, y, 0.0f));
             glm::mat4 MVP = projection * view * model;
             transforms.push_back(MVP);
         }
 
-        model.enableInstancing(transforms);
-        model.draw();
+        rock.enableInstancing(transforms);
+        rock.draw();
     }
+
+    Model& planet = *models[1];
+    Shader& shader = *shaders[0];
+    shader.use();
+    glm::mat4 model = glm::translate(modelMatrix, glm::vec3(0.0f, -3.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+    shader.setUniform("model", model);
+    shader.setUniform("view", camera.getViewMatrix());
+    shader.setUniform("projection", camera.getProjectionMatrix());
+    shader.setUniform("modelLight", modelLight);
+
+    planet.draw();
 
     // geometry shader
     Shader& geoShader = *shaders[3];
@@ -198,6 +230,11 @@ void Renderer::render()
     geoShader.setUniform("normalColor", normalColor);
     //model.draw();
 
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, msFrameBuffer.getFBO());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sceneFrameBuffer.getFBO());
+    glBlitFramebuffer(0, 0, window.getWidth(), window.getHeight(), 
+        0, 0, window.getWidth(), window.getHeight(), 
+        GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_DEPTH_TEST);
 
@@ -219,8 +256,8 @@ void Renderer::onImGuiRender()
     ImGui::Begin("Post Processing");
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
-    light.onImGuiRender();
-    ImGui::ColorEdit3("Normal Color", glm::value_ptr(normalColor));
+    //light.onImGuiRender();
+    //ImGui::ColorEdit3("Normal Color", glm::value_ptr(normalColor));
     ImGui::Combo("Effect Mode", &effectMode, "normal\0inversion\0grayscale\0sharpen\0blur\0\0");
     if (effectMode == 3 || effectMode == 4)
     {
@@ -235,8 +272,46 @@ void Renderer::onImGuiRender()
     ImGui::Checkbox("Enable Instancing", &enableInstancing);
     if (enableInstancing)
     {
-        unsigned int min = 1, max = 500;
-        ImGui::SliderScalar("Instance Count", ImGuiDataType_U32, &instance, &min, &max);
+        const int minInstance = 1, maxInstance = 10000;
+        static int step = 1;  
+        // Step input
+        ImGui::Text("Step:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(30);
+        ImGui::InputInt("##Step", &step, 0, 0);
+        if (step < 1) step = 1;
+        ImGui::SameLine();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 0));
+
+        ImGui::Text("Instance Count:");
+        ImGui::SameLine();
+
+        if (ImGui::Button("-##Decrease"))
+        {
+            instance -= step;
+            if (instance < minInstance) instance = minInstance;
+        }
+        ImGui::SameLine();
+
+        ImGui::SetNextItemWidth(30);
+        ImGui::InputInt("##InstanceInput", &instance, 0, 0);
+        if (instance < minInstance) instance = minInstance;
+        if (instance > maxInstance) instance = maxInstance;
+
+        ImGui::SameLine();
+        if (ImGui::Button("+##Increase"))
+        {
+            instance += step;
+            if (instance > maxInstance) instance = maxInstance;
+        }
+        ImGui::PopStyleVar();
+    }
+
+    if (ImGui::Checkbox("MSAA", &useMSAA))
+    {
+        // rebulid FrameBuffer
+        Framebuffers[0] = std::make_unique<FrameBuffer>(window, true, useMSAA);
     }
 
     ImGui::End();

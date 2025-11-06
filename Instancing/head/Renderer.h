@@ -38,7 +38,9 @@ private:
 	glm::vec3 normalColor;
 
 	bool enableInstancing = false;
-	unsigned int instance = 1;
+	int instance = 1;
+
+	bool useMSAA = false;
 
 public:
 	Renderer(Camera& cam, InputManager& input, Window& win, const std::vector<std::string>& modelPaths);

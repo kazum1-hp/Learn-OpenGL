@@ -4,11 +4,12 @@
 
 class Texture
 {
-public:
+private:
 	unsigned int ID;
 	int unit;
 	std::string type;
 
+public:
 	Texture(const std::string& path, int textureUnit = 0, const std::string& typeName = "diffuse");
 
 	Texture(GLuint textureID, int textureUnit = 0, const std::string& typeName = "color")
@@ -37,5 +38,6 @@ public:
 	}
 
 	void bind() const;
+	GLuint getID() const { return ID; }
 	~Texture();
 };

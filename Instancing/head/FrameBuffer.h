@@ -12,12 +12,12 @@ private:
 	GLuint texColor;
 	std::shared_ptr<Texture> colorTexture;
 
-	void init(int w, int h, bool useDepth);
+	void init(int w, int h, bool useDepth, bool useMs);
 
 public:
-	FrameBuffer(Window& window, bool useDepth = true);
+	FrameBuffer(Window& window, bool useDepth = true, bool useMs = false);
 
-	FrameBuffer(int w = 1920, int h = 1080, bool useDepth = true);
+	FrameBuffer(int w = 1920, int h = 1080, bool useDepth = true, bool useMs = false);
 
 	~FrameBuffer();
 
