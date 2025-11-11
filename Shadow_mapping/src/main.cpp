@@ -1,7 +1,7 @@
 #include "../head/Application.h"
 
 int main() {
-	Application app("Light");
+	Application app("Shadow");
 	app.run();
 	return 0;
 }
