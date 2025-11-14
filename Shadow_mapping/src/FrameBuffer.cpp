@@ -25,8 +25,6 @@ void FrameBuffer::init(int w, int h, bool useDepth, bool useMs, bool useDepthMap
 
 		// texture attachment
 		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, w, h, GL_TRUE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texColor, 0);
 
@@ -96,7 +94,8 @@ void FrameBuffer::init(int w, int h, bool useDepth, bool useMs, bool useDepthMap
 
 FrameBuffer::~FrameBuffer()
 {
-	glDeleteTextures(1, &texColor);
-	glDeleteRenderbuffers(1, &RBO);
-	glDeleteFramebuffers(1, &FBO);
+	if (texColor) glDeleteTextures(1, &texColor);
+	if (texDepth) glDeleteTextures(1, &texDepth);
+	if (RBO) glDeleteRenderbuffers(1, &RBO);
+	if (FBO) glDeleteFramebuffers(1, &FBO);
 }

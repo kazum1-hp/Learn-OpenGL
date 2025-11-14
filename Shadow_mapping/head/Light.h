@@ -46,10 +46,10 @@ private:
 	glm::vec3 position;
 	glm::vec3 direction;
 
-	float orthoRange = 10.0f;
-	float nearPlane = 1.0f, farPlane = 10.0f;
+	float orthoRange = 100.0f;
+	float nearPlane = 1.0f, farPlane = 100.0f;
 
 	float speed = 0.2f;
-	float distance = 10.0f;
+	float distance = 100.0f;
 };
 

@@ -5,9 +5,9 @@
 
 Application::Application(const char* title)
 	: camera(),
-	  window(title, camera, input),  
 	  input(camera),
-	  renderer(camera, input, window, { "../Assets/ina/ina.pmx"}),
+	  window(title, camera, input),
+	  renderer(camera, input, window, { "../Assets/raiden/raiden.pmx", "../Assets/cat/cat.pmx", "../Assets/hanabi/hanabi.pmx" }),
 	  running(true)
 {
 	if (!window.getWindow())
@@ -15,6 +15,35 @@ Application::Application(const char* title)
 		running = false;
 		return;
 	}
+
+	init();
+}
+
+void Application::init()
+{
+	glEnable(GL_DEPTH_TEST);
+	// 如果将来有更多初始化（如帧缓冲、后期处理系统），在这里统一注册
+	// 例如：
+	// renderer.initFrameBuffers();
+	// sceneManager.loadDefaultScene();
+}
+
+void Application::initImGui()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+}
+
+void Application::shutdownImGui()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 void Application::run()
@@ -22,22 +51,12 @@ void Application::run()
 	if (!running) return;
 
 	// initial ImGui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	ImGui::StyleColorsDark(); 
-
-	// initial platform/render bind
-	ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
-	ImGui_ImplOpenGL3_Init("#version 330");
+	initImGui();
 
 	float lastFrame = 0.0f;
 
 	while (!glfwWindowShouldClose(window.getWindow())) {
-		// ImGui new frame 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		
 		
 		float currentFrame = static_cast<float>(glfwGetTime());
 		float deltaTime = currentFrame - lastFrame;
@@ -50,6 +69,11 @@ void Application::run()
 
 		renderer.render();
 
+		// ImGui new frame 
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		// ImGui content	
 		renderer.onImGuiRender();
 
@@ -60,23 +84,31 @@ void Application::run()
 		// Swap buffers and poll IO events
 		glfwSwapBuffers(window.getWindow());
 		glfwPollEvents();
-
-		input.closeWindow(window.getWindow());
+		
+		if (input.shouldClose()) {
+			glfwSetWindowShouldClose(window.getWindow(), true);
+			continue; 
+		}
 	}
 }
 
 void Application::update(float deltaTime)
 {
-	input.cursorState(window.getWindow());
-	input.moveControl(window.getWindow(), camera, deltaTime);
-	input.lightControl(window.getWindow());
+	input.update(window.getWindow(), deltaTime);
+	// 如果将来要加入 SceneManager，可以在这里统一 update：
+	// sceneManager.update(deltaTime);
+}
+
+void Application::shutdown()
+{
+	glfwTerminate();
 }
 
 Application::~Application()
 {
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-
-	glfwTerminate(); //release resources
+	if (running)
+	{
+		shutdownImGui();
+		shutdown();
+	}
 }

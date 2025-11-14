@@ -118,22 +118,23 @@ std::vector<VertexAttribute> cube_attributes = {
 };
 
 Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vector<std::string>& modelPaths)
-    :skybox(faces),
-     camera(cam),
+    :camera(cam),
      input(input),
      window(win)
 {
     for (const auto& path : modelPaths) {
         models.push_back(std::make_unique<Model>(path));
     }
-    Model& raiden = *models[0];
 
-    Framebuffers.push_back(std::make_unique<FrameBuffer>(window, true, false, false));
-    Framebuffers.push_back(std::make_unique<FrameBuffer>(window, false, false, false));
-    Framebuffers.push_back(std::make_unique<FrameBuffer>(window, false, false, true));
-    FrameBuffer& msFrameBuffer = *Framebuffers[0];
-    FrameBuffer& sceneFrameBuffer = *Framebuffers[1];
-    FrameBuffer& shadowFrameBuffer = *Framebuffers[2];
+    /*skyboxes.push_back(std::make_unique<Skybox>());
+    Skybox& skybox = *skyboxes[0];*/
+
+    framebuffers.push_back(std::make_unique<FrameBuffer>(window, true, true, false, false));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(window, false, false, false, false));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, false, true));
+    FrameBuffer& msFrameBuffer = *framebuffers[0];
+    FrameBuffer& sceneFrameBuffer = *framebuffers[1];
+    FrameBuffer& shadowFrameBuffer = *framebuffers[2];
 
     geometrys.push_back(std::make_unique<Geometry>(quadVertices, indices, attributes));
     geometrys.push_back(std::make_unique<Geometry>(planeVertices, p_indices, f_attributes));
@@ -152,7 +153,7 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
     shaders.push_back(std::make_unique<Shader>("shader/framebuffer.vs", "shader/framebuffer.fs"));    // framebuffer shader
     shaders.push_back(std::make_unique<Shader>("shader/skybox.vs", "shader/skybox.fs"));    // skybox shader
     shaders.push_back(std::make_unique<Shader>("shader/shadow.vs", "shader/shadow.fs"));    // shadow shader
-    shaders.push_back(std::make_unique<Shader>("shader/debug.vs", "shader/debug.fs"));    // shadow shader
+    shaders.push_back(std::make_unique<Shader>("shader/pointShadow.vs", "shader/pointShadow.fs", "shader/pointShadow.gs"));    // shadow shader
 
     Shader& shader = *shaders[0];
     shader.use();
@@ -161,17 +162,14 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
     Material& material = *materials[0];
 
     shader.setUniform("textures", 0);
+
+    shader.setUniform("shadowMap", 1);
+
     shader.setUniform("material.shininess", material.getShininess());
     shader.setUniform("pointLight.constant", 1.0f);
     shader.setUniform("pointLight.linear", 0.09f);
     shader.setUniform("pointLight.quadratic", 0.032f);
 
-    Shader& skyboxShader = *shaders[2];
-    skyboxShader.setUniform("skybox", 0);
-
-    Shader& debug = *shaders[4];
-    debug.use();
-    debug.setUniform("depthMap", 0);
     // --- glEnable ---
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -182,46 +180,77 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
 void Renderer::render()
 {
     glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 LightSpaceMatrix = light.getProjectionMatrix() * light.getViewMatrix();
     
     light.Update();
 
-    FrameBuffer& msFrameBuffer = *Framebuffers[0];
-    FrameBuffer& sceneFrameBuffer = *Framebuffers[1];
-    FrameBuffer& shadowFrameBuffer = *Framebuffers[2];
+    FrameBuffer& msFrameBuffer = *framebuffers[0];
+    FrameBuffer& sceneFrameBuffer = *framebuffers[1];
+    FrameBuffer& shadowFrameBuffer = *framebuffers[2];
     
-    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glViewport(0, 0, SHADOW_Size, SHADOW_Size);
     glBindFramebuffer(GL_FRAMEBUFFER, shadowFrameBuffer.getFBO());
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    Shader& shadowShader = *shaders[3];
+    Shader& shadowShader = *shaders[4];
     shadowShader.use();
 
-    glm::mat4 planeModel = model;
-    shadowShader.setUniform("lightSpaceMatrix", LightSpaceMatrix);
-    shadowShader.setUniform("model", planeModel);
-    //meshes[1]->draw();
+    for (GLuint i = 0; i < 6; ++i)
+    {
+        shadowShader.setUniform("shadowMatrices[" + std::to_string(i) + "]", light.getPerspTransMatrix(i));
+    }
 
-    glm::mat4 cube1Model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0f));
+    shadowShader.setUniform("far_plane", light.getFar());
+    shadowShader.setUniform("lightPos", light.getLightPos());
+    
+    glm::mat4 planeModel = model;
+    shadowShader.setUniform("model", planeModel);
+    meshes[1]->draw();
+
+    glm::mat4 cube1Model = glm::scale(model, glm::vec3(10.0f));
     shadowShader.setUniform("model", cube1Model);
     //meshes[2]->draw();
 
-    glm::mat4 cube2Model = glm::translate(model, glm::vec3(2.0f, 0.0f, 1.0f));
+    glm::mat4 cube2Model = glm::translate(model, glm::vec3(4.0f, -3.5f, 0.0));
+    cube2Model = glm::scale(cube2Model, glm::vec3(0.5f));
     shadowShader.setUniform("model", cube2Model);
     //meshes[2]->draw();
 
-    glm::mat4 cube3Model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 2.0f));
-    cube3Model = glm::rotate(cube3Model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
-    cube3Model = glm::scale(cube3Model, glm::vec3(0.25f));
+    glm::mat4 cube3Model = glm::translate(model, glm::vec3(2.0f, 3.0f, 1.0));
+    cube3Model = glm::scale(cube3Model, glm::vec3(0.75f));
     shadowShader.setUniform("model", cube3Model);
     //meshes[2]->draw();
-    
-    glm::mat4 raidenModel = glm::translate(model, glm::vec3(0.0f));
+
+    glm::mat4 cube4Model = glm::translate(model, glm::vec3(-3.0f, -1.0f, 0.0));
+    cube4Model = glm::scale(cube4Model, glm::vec3(0.5f));
+    shadowShader.setUniform("model", cube4Model);
+    //meshes[2]->draw();
+
+    glm::mat4 cube5Model = glm::translate(model, glm::vec3(-1.5f, 1.0f, 1.5));
+    cube5Model = glm::scale(cube5Model, glm::vec3(0.5f));
+    shadowShader.setUniform("model", cube5Model);
+    //meshes[2]->draw();
+
+    glm::mat4 cube6Model = glm::translate(model, glm::vec3(-1.5f, 2.0f, -3.0));
+    cube6Model = glm::rotate(cube6Model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+    cube6Model = glm::scale(cube6Model, glm::vec3(0.75f));
+    shadowShader.setUniform("model", cube6Model);
+    //meshes[2]->draw();
+
+    glm::mat4 raidenModel = glm::translate(model, glm::vec3(-1.5f, -1.0f, 1.0f));
     raidenModel = glm::scale(raidenModel, glm::vec3(0.1));
     shadowShader.setUniform("model", raidenModel);
-
     Model& raiden = *models[0];
     raiden.draw();
+
+    glm::mat4 catModel = glm::translate(raidenModel, glm::vec3(-20.0f, 0.0f, 0.0f));
+    shadowShader.setUniform("model", catModel);
+    Model& cat = *models[1];
+    cat.draw();
+
+    glm::mat4 hanabiModel = glm::translate(raidenModel, glm::vec3(20.0f, 0.0f, 0.0f));
+    shadowShader.setUniform("model", hanabiModel);
+    Model& hanabi = *models[2];
+    hanabi.draw();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -230,42 +259,22 @@ void Renderer::render()
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // skybox
-    glDepthFunc(GL_LEQUAL);
-    Shader& skyboxShader = *shaders[2];
-    skyboxShader.use();
-
-    skyboxShader.setUniform("view", glm::mat4(glm::mat3(camera.getViewMatrix())));
-    skyboxShader.setUniform("projection", camera.getProjectionMatrix());
-    skyboxShader.setUniform("light", skyboxLight);
-
-    skybox.bind();
-    //skybox.draw();
-    glDepthFunc(GL_LESS);
-
     // object
     Shader& shader = *shaders[0];
     shader.use();
 
+    shader.setUniform("shadows", shadows);
+    shader.setUniform("far_plane", light.getFar());
     // transform matrix
     shader.setUniform("view", camera.getViewMatrix());
     shader.setUniform("projection", camera.getProjectionMatrix());
     shader.setUniform("viewPos", camera.getPosition());
 
-    shader.setUniform("lightSpaceMatrix", LightSpaceMatrix);
-
     // light 
     shader.setUniform("useBlinnPhong", useBlinnPhong);
     shader.setUniform("useQuadratic", useQuadratic);
     shader.setUniform("modelLight", modelLight);
-    shader.setUniform("parallelLight.enabled", input.parallelLightOn);
-    shader.setUniform("pointLight.enabled", input.pointLightOn);
-
-    // paralleLight
-    shader.setUniform("parallelLight.ambient", light.getAmbient() * light.getColor());
-    shader.setUniform("parallelLight.diffuse", light.getDiffuse() * light.getColor());
-    shader.setUniform("parallelLight.specular", light.getSpecular() * light.getColor());
-    shader.setUniform("parallelLight.direction", light.getLightDir());
+    shader.setUniform("pointLight.enabled", input.isPointLightOn());
 
     //point light
     shader.setUniform("pointLight.ambient", light.getAmbient() * light.getColor());
@@ -275,37 +284,51 @@ void Renderer::render()
 
     // plane
     
-    shadowFrameBuffer.getDepthTexture()->bind();
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, shadowFrameBuffer.getDepthCube());
 
+    shader.setUniform("textures", 0);
     shader.setUniform("shadowMap", 1);
 
     shader.setUniform("model", planeModel);
 
-    //meshes[1]->draw();
+    meshes[1]->draw();
 
     // cubes
 
-    //shader.setUniform("shadowMap", 1);
-
     shader.setUniform("model", cube1Model);
+    //glDisable(GL_CULL_FACE);
+    //shader.setUniform("reverse_normals", 1);
     //meshes[2]->draw();
+    //shader.setUniform("reverse_normals", 0);
+    //glEnable(GL_CULL_FACE);
 
     shader.setUniform("model", cube2Model);
     //meshes[2]->draw();
 
     shader.setUniform("model", cube3Model);
+   //meshes[2]->draw();
+
+    shader.setUniform("model", cube4Model);
+    //meshes[2]->draw();
+
+    shader.setUniform("model", cube5Model);
+    //meshes[2]->draw();
+
+    shader.setUniform("model", cube6Model);
     //meshes[2]->draw();
 
     shader.setUniform("model", raidenModel);
     
-    //raiden.draw();
-
-    Shader& debug = *shaders[4];
-    debug.use();
-    //shadowFrameBuffer.getDepthTexture()->bind();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shadowFrameBuffer.getDepthTexture()->getID());
     raiden.draw();
+
+    shader.setUniform("model", catModel);
+
+    cat.draw();
+
+    shader.setUniform("model", hanabiModel);
+
+    hanabi.draw();
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, msFrameBuffer.getFBO());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sceneFrameBuffer.getFBO());
@@ -349,7 +372,7 @@ void Renderer::onImGuiRender()
     if (ImGui::Checkbox("MSAA", &useMSAA))
     {
         // rebulid FrameBuffer
-        Framebuffers[0] = std::make_unique<FrameBuffer>(window, true, useMSAA, false);
+        framebuffers[0] = std::make_unique<FrameBuffer>(window, true, useMSAA, false);
     }
     ImGui::SameLine();
     ImGui::Checkbox("useBinnPhong", &useBlinnPhong);
