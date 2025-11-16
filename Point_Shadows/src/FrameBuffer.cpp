@@ -83,7 +83,7 @@ void FrameBuffer::init(unsigned int w, unsigned int h, bool useDepth, bool useMs
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
 
-        depthCubeTexture = std::make_shared<Texture>(texDepthCube, 1);
+        depthCubeTexture = std::make_shared<Texture>(texDepthCube, 2);
     }
     else if (useDepth) {
         // renderbuffer depth/stencil

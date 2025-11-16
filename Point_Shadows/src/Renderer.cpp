@@ -131,10 +131,12 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
 
     framebuffers.push_back(std::make_unique<FrameBuffer>(window, true, true, false, false));
     framebuffers.push_back(std::make_unique<FrameBuffer>(window, false, false, false, false));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, true, false));
     framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, false, true));
     FrameBuffer& msFrameBuffer = *framebuffers[0];
     FrameBuffer& sceneFrameBuffer = *framebuffers[1];
-    FrameBuffer& shadowFrameBuffer = *framebuffers[2];
+    FrameBuffer& parallelShadowFrameBuffer = *framebuffers[2];
+    FrameBuffer& pointShadowFrameBuffer = *framebuffers[3];
 
     geometrys.push_back(std::make_unique<Geometry>(quadVertices, indices, attributes));
     geometrys.push_back(std::make_unique<Geometry>(planeVertices, p_indices, f_attributes));
@@ -162,8 +164,8 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
     Material& material = *materials[0];
 
     shader.setUniform("textures", 0);
-
-    shader.setUniform("shadowMap", 1);
+    shader.setUniform("depthMap", 1);
+    shader.setUniform("shadowMap", 2);
 
     shader.setUniform("material.shininess", material.getShininess());
     shader.setUniform("pointLight.constant", 1.0f);
@@ -179,78 +181,48 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
 
 void Renderer::render()
 {
-    glm::mat4 model = glm::mat4(1.0f);
-    
-    light.Update();
+    glm::mat4 LightSpaceMatrix = light.getOrthoMatrix() * light.getOrthoViewMatrix();
+
+    //light.Update();
 
     FrameBuffer& msFrameBuffer = *framebuffers[0];
     FrameBuffer& sceneFrameBuffer = *framebuffers[1];
-    FrameBuffer& shadowFrameBuffer = *framebuffers[2];
+    FrameBuffer& parallelShadowFrameBuffer = *framebuffers[2];
+    FrameBuffer& pointShadowFrameBuffer = *framebuffers[3];
     
     glViewport(0, 0, SHADOW_Size, SHADOW_Size);
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowFrameBuffer.getFBO());
-    glClear(GL_DEPTH_BUFFER_BIT);
 
-    Shader& shadowShader = *shaders[4];
-    shadowShader.use();
-
-    for (GLuint i = 0; i < 6; ++i)
+    if (input.isParallelLightOn())
     {
-        shadowShader.setUniform("shadowMatrices[" + std::to_string(i) + "]", light.getPerspTransMatrix(i));
+        glBindFramebuffer(GL_FRAMEBUFFER, parallelShadowFrameBuffer.getFBO());
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        Shader& shadowShader = *shaders[3];
+        shadowShader.use();
+
+        shadowShader.setUniform("lightSpaceMatrix", LightSpaceMatrix);
+
+        renderModel(shadowShader);
     }
 
-    shadowShader.setUniform("far_plane", light.getFar());
-    shadowShader.setUniform("lightPos", light.getLightPos());
-    
-    glm::mat4 planeModel = model;
-    shadowShader.setUniform("model", planeModel);
-    meshes[1]->draw();
+    if (input.isPointLightOn())
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, pointShadowFrameBuffer.getFBO());
+        glClear(GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 cube1Model = glm::scale(model, glm::vec3(10.0f));
-    shadowShader.setUniform("model", cube1Model);
-    //meshes[2]->draw();
+        Shader& shadowShader = *shaders[4];
+        shadowShader.use();
 
-    glm::mat4 cube2Model = glm::translate(model, glm::vec3(4.0f, -3.5f, 0.0));
-    cube2Model = glm::scale(cube2Model, glm::vec3(0.5f));
-    shadowShader.setUniform("model", cube2Model);
-    //meshes[2]->draw();
+        for (GLuint i = 0; i < 6; ++i)
+        {
+            shadowShader.setUniform("shadowMatrices[" + std::to_string(i) + "]", light.getPerspTransMatrix(i));
+        }
 
-    glm::mat4 cube3Model = glm::translate(model, glm::vec3(2.0f, 3.0f, 1.0));
-    cube3Model = glm::scale(cube3Model, glm::vec3(0.75f));
-    shadowShader.setUniform("model", cube3Model);
-    //meshes[2]->draw();
+        shadowShader.setUniform("far_plane", light.getFar());
+        shadowShader.setUniform("lightPos", light.getLightPos());
 
-    glm::mat4 cube4Model = glm::translate(model, glm::vec3(-3.0f, -1.0f, 0.0));
-    cube4Model = glm::scale(cube4Model, glm::vec3(0.5f));
-    shadowShader.setUniform("model", cube4Model);
-    //meshes[2]->draw();
-
-    glm::mat4 cube5Model = glm::translate(model, glm::vec3(-1.5f, 1.0f, 1.5));
-    cube5Model = glm::scale(cube5Model, glm::vec3(0.5f));
-    shadowShader.setUniform("model", cube5Model);
-    //meshes[2]->draw();
-
-    glm::mat4 cube6Model = glm::translate(model, glm::vec3(-1.5f, 2.0f, -3.0));
-    cube6Model = glm::rotate(cube6Model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-    cube6Model = glm::scale(cube6Model, glm::vec3(0.75f));
-    shadowShader.setUniform("model", cube6Model);
-    //meshes[2]->draw();
-
-    glm::mat4 raidenModel = glm::translate(model, glm::vec3(-1.5f, -1.0f, 1.0f));
-    raidenModel = glm::scale(raidenModel, glm::vec3(0.1));
-    shadowShader.setUniform("model", raidenModel);
-    Model& raiden = *models[0];
-    raiden.draw();
-
-    glm::mat4 catModel = glm::translate(raidenModel, glm::vec3(-20.0f, 0.0f, 0.0f));
-    shadowShader.setUniform("model", catModel);
-    Model& cat = *models[1];
-    cat.draw();
-
-    glm::mat4 hanabiModel = glm::translate(raidenModel, glm::vec3(20.0f, 0.0f, 0.0f));
-    shadowShader.setUniform("model", hanabiModel);
-    Model& hanabi = *models[2];
-    hanabi.draw();
+        renderModel(shadowShader);
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -263,8 +235,6 @@ void Renderer::render()
     Shader& shader = *shaders[0];
     shader.use();
 
-    shader.setUniform("shadows", shadows);
-    shader.setUniform("far_plane", light.getFar());
     // transform matrix
     shader.setUniform("view", camera.getViewMatrix());
     shader.setUniform("projection", camera.getProjectionMatrix());
@@ -274,61 +244,48 @@ void Renderer::render()
     shader.setUniform("useBlinnPhong", useBlinnPhong);
     shader.setUniform("useQuadratic", useQuadratic);
     shader.setUniform("modelLight", modelLight);
-    shader.setUniform("pointLight.enabled", input.isPointLightOn());
+
+    // paralleLight
+    shader.setUniform("parallelLight.ambient", light.getAmbient() * light.getColor());
+    shader.setUniform("parallelLight.diffuse", light.getDiffuse() * light.getColor());
+    shader.setUniform("parallelLight.specular", light.getSpecular() * light.getColor());
+    shader.setUniform("parallelLight.direction", light.getLightDir());
+    shader.setUniform("parallelLight.enabled", input.isParallelLightOn());
+    shader.setUniform("lightSpaceMatrix", LightSpaceMatrix);
+    shader.setUniform("parallelShadows", parallelShadows);
 
     //point light
     shader.setUniform("pointLight.ambient", light.getAmbient() * light.getColor());
     shader.setUniform("pointLight.diffuse", light.getDiffuse() * light.getColor());
     shader.setUniform("pointLight.specular", light.getSpecular() * light.getColor());
     shader.setUniform("pointLight.position", light.getLightPos());
+    shader.setUniform("pointLight.enabled", input.isPointLightOn());
+    shader.setUniform("far_plane", light.getFar());
+    shader.setUniform("pointShadows", pointShadows);
 
     // plane
-    
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, shadowFrameBuffer.getDepthCube());
-
     shader.setUniform("textures", 0);
-    shader.setUniform("shadowMap", 1);
 
-    shader.setUniform("model", planeModel);
+    if (input.isParallelLightOn())
+    {
+        pointShadows = false;
 
-    meshes[1]->draw();
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, parallelShadowFrameBuffer.getDepth2D());
 
-    // cubes
+        shader.setUniform("depthMap", 1);
+    }
+    else pointShadows = true;
 
-    shader.setUniform("model", cube1Model);
-    //glDisable(GL_CULL_FACE);
-    //shader.setUniform("reverse_normals", 1);
-    //meshes[2]->draw();
-    //shader.setUniform("reverse_normals", 0);
-    //glEnable(GL_CULL_FACE);
+    if (input.isPointLightOn())
+    {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, pointShadowFrameBuffer.getDepthCube());
 
-    shader.setUniform("model", cube2Model);
-    //meshes[2]->draw();
+        shader.setUniform("shadowMap", 2);
+    }
 
-    shader.setUniform("model", cube3Model);
-   //meshes[2]->draw();
-
-    shader.setUniform("model", cube4Model);
-    //meshes[2]->draw();
-
-    shader.setUniform("model", cube5Model);
-    //meshes[2]->draw();
-
-    shader.setUniform("model", cube6Model);
-    //meshes[2]->draw();
-
-    shader.setUniform("model", raidenModel);
-    
-    raiden.draw();
-
-    shader.setUniform("model", catModel);
-
-    cat.draw();
-
-    shader.setUniform("model", hanabiModel);
-
-    hanabi.draw();
+    renderModel(shader);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, msFrameBuffer.getFBO());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sceneFrameBuffer.getFBO());
@@ -352,6 +309,61 @@ void Renderer::render()
     glEnable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::renderModel(Shader& shader)
+{
+    glm::mat4 model = glm::mat4(1.0f);
+
+    glm::mat4 planeModel = model;
+    shader.setUniform("model", planeModel);
+    meshes[1]->draw();
+
+    glm::mat4 cube1Model = glm::scale(model, glm::vec3(10.0f));
+    shader.setUniform("model", cube1Model);
+    //meshes[2]->draw();
+
+    glm::mat4 cube2Model = glm::translate(model, glm::vec3(4.0f, -3.5f, 0.0f));
+    cube2Model = glm::scale(cube2Model, glm::vec3(0.5f));
+    shader.setUniform("model", cube2Model);
+    //meshes[2]->draw();
+
+    glm::mat4 cube3Model = glm::translate(model, glm::vec3(2.0f, 3.0f, 1.0f));
+    cube3Model = glm::scale(cube3Model, glm::vec3(0.75f));
+    shader.setUniform("model", cube3Model);
+    //meshes[2]->draw();
+
+    glm::mat4 cube4Model = glm::translate(model, glm::vec3(-3.0f, -1.0f, 0.0f));
+    cube4Model = glm::scale(cube4Model, glm::vec3(0.5f));
+    shader.setUniform("model", cube4Model);
+    //meshes[2]->draw();
+
+    glm::mat4 cube5Model = glm::translate(model, glm::vec3(-1.5f, 1.0f, 1.5f));
+    cube5Model = glm::scale(cube5Model, glm::vec3(0.5f));
+    shader.setUniform("model", cube5Model);
+    //meshes[2]->draw();
+
+    glm::mat4 cube6Model = glm::translate(model, glm::vec3(-1.5f, 2.0f, -3.0f));
+    cube6Model = glm::rotate(cube6Model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
+    cube6Model = glm::scale(cube6Model, glm::vec3(0.75f));
+    shader.setUniform("model", cube6Model);
+    //meshes[2]->draw();
+
+    glm::mat4 raidenModel = glm::translate(model, glm::vec3(-1.5f, -1.0f, 1.0f));
+    raidenModel = glm::scale(raidenModel, glm::vec3(0.1f));
+    shader.setUniform("model", raidenModel);
+    Model& raiden = *models[0];
+    raiden.draw();
+
+    glm::mat4 catModel = glm::translate(raidenModel, glm::vec3(-20.0f, 0.0f, 0.0f));
+    shader.setUniform("model", catModel);
+    Model& cat = *models[1];
+    cat.draw();
+
+    glm::mat4 hanabiModel = glm::translate(raidenModel, glm::vec3(20.0f, 0.0f, 0.0f));
+    shader.setUniform("model", hanabiModel);
+    Model& hanabi = *models[2];
+    hanabi.draw();
 }
 
 void Renderer::onImGuiRender()

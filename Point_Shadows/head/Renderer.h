@@ -40,17 +40,19 @@ private:
 	//bool enableInstancing = false;
 	//int instance = 1;
 
-	bool useMSAA = false;
-	bool useBlinnPhong = false;
-	bool useQuadratic = false;
-	bool useGamma = false;
+	bool useMSAA = true;
+	bool useBlinnPhong = true;
+	bool useQuadratic = true;
+	bool useGamma = true;
 
 	const unsigned int SHADOW_Size = 1024;
-	bool shadows = true;
+	bool parallelShadows = true;
+	bool pointShadows = true;
 
 public:
 	Renderer(Camera& cam, InputManager& input, Window& win, const std::vector<std::string>& modelPaths);
 	void render();
+	void renderModel(Shader& shader);
 	void onImGuiRender();
 };
 

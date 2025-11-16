@@ -33,7 +33,7 @@ Texture::Texture(const std::string& path, int textureUnit, const std::string& ty
 	std::wstring wpath(wlen, L'\0');
 	MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, &wpath[0], wlen);
 	std::wcout.imbue(std::locale(""));
-	std::wcout << L"[Texture] Trying to load: " << wpath << std::endl;
+	//std::wcout << L"[Texture] Trying to load: " << wpath << std::endl;
 
 	// read file to memory by using ifstream
 	std::ifstream file(wpath, std::ios::binary | std::ios::ate);
@@ -69,8 +69,8 @@ Texture::Texture(const std::string& path, int textureUnit, const std::string& ty
 
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		std::cerr << "Loading texture: " << path << std::endl;
-		std::cerr << "Size: " << width << "x" << height << ", Channels: " << nrChannels << std::endl;
+		//std::cerr << "Loading texture: " << path << std::endl;
+		//std::cerr << "Size: " << width << "x" << height << ", Channels: " << nrChannels << std::endl;
 	}
 
 	else

@@ -63,12 +63,12 @@ private:
 
 	//ortho matrix
 	GLfloat orthoRange = 10.0f;
-	GLfloat nearPlane = 1.0f, farPlane = 20.0f;
+	GLfloat nearPlane = 1.0f, farPlane = 50.0f;
+	float distance = 10.0f;
 
 	//projection matrix
-	GLfloat near = 1.0f, far = 25.0f;
+	GLfloat near = 1.0f, far = 30.0f;
 	GLfloat aspect = 1024.0f / 1024.0f;
 	float speed = 0.2f;
-	float distance = 10.0f;
 };
 
