@@ -49,11 +49,14 @@ uniform float modelLight;
 
 uniform sampler2D depthMap;
 uniform samplerCube shadowMap;
+
 uniform sampler2D diffuse;
 uniform sampler2D specular;
 uniform sampler2D normal;
 uniform sampler2D height;
 uniform bool hasNormalMap;
+uniform bool hasHeightMap;
+uniform float height_scale;
 
 uniform vec3 viewPos;
 uniform bool useBlinnPhong;
@@ -73,32 +76,50 @@ vec3 gridSamplingDisk[20] = vec3[]
    vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
 
-vec3 CalParallelLight(ParallelLight parallelLight, vec3 norm, vec3 viewDir, vec3 texColor, float shadow);
-vec3 CalPointLight(PointLight pointLight, vec3 norm, vec3 viewDir, vec3 texColor, float shadow);
+vec3 CalParallelLight(ParallelLight parallelLight, vec3 norm, vec3 viewDir, vec3 parallelLightDir, vec3 texColor, float parallelShadow);
+vec3 CalPointLight(PointLight pointLight, vec3 norm, vec3 viewDir, vec3 pointLightDir, vec3 texColor, float pointShadow);
 
-float ShadowCalculation(vec4 FragPosLightSpace, vec3 norm);
+float ShadowCalculation(vec4 FragPosLightSpace, vec3 n);
 float PointShadowCalculation(vec3 fragPos);
+
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
 
 void main()
 {
 	vec3 N = normalize(fs_in.Normal);
 	vec3 T = normalize(fs_in.Tangent);
-	vec3 B = normalize(fs_in.Bitangent);
-	mat3 TBN = mat3(T, B, N);
+	T = normalize(T - dot(T, N) * N);
+	vec3 B = cross(T, N);
+	mat3 TBN = transpose(mat3(T, B, N));
 
-	vec3 norm;
+	vec3 norm = N;
+	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+	vec3 parallelLightDir = normalize(-parallelLight.direction);
+	vec3 pointLightDir = normalize(pointLight.position - fs_in.FragPos);
+	vec2 texCoords = fs_in.TexCoord;
 
-	if (hasNormalMap) {
-		vec3 normalTex = texture(normal, fs_in.TexCoord).xyz;
-		normalTex = normalTex * 2.0 - 1.0;
-		norm = normalize(TBN * normalTex);
-	} else {
-		norm = N;
+	if (hasHeightMap)
+	{
+		viewDir = normalize(TBN * viewDir);
+		texCoords = ParallaxMapping(fs_in.TexCoord,  viewDir);
+	
+		 // discards a fragment when sampling outside default texture region (fixes border artifacts)
+		if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
+			discard;
 	}
 
-	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+	if (hasNormalMap)
+	{
+		vec3 normalTex = texture(normal, texCoords).xyz;
+		normalTex = normalTex * 2.0 - 1.0;
+		norm = normalize(normalTex);
 
-	vec4 texColor = texture(diffuse, fs_in.TexCoord);
+		viewDir = normalize(TBN * viewDir);
+		parallelLightDir = normalize(TBN * parallelLightDir);
+		pointLightDir = normalize(TBN * pointLightDir);
+	}
+	
+	vec4 texColor = texture(diffuse, texCoords);
 	float alpha = texColor.a;
 
 	if (alpha < 0.1)
@@ -107,21 +128,21 @@ void main()
 	//vec4 specularColor = texture(specular, fs_in.TexCoord);
 	//vec3 texColor = vec3(diffuseColor ).rgb;
 
-	float parallelShadow = parallelShadows ? ShadowCalculation(fs_in.FragPosLightSpace, norm) : 0.0;
+	float parallelShadow = parallelShadows ? ShadowCalculation(fs_in.FragPosLightSpace, N) : 0.0;
 	float pointShadow = pointShadows ? PointShadowCalculation(fs_in.FragPos) : 0.0;
 
-	vec3 textureColor = (CalParallelLight(parallelLight, norm, viewDir, texColor.rgb, parallelShadow) * 0.2
-						+ CalPointLight(pointLight, norm, viewDir, texColor.rgb, pointShadow)) * modelLight;
+	vec3 textureColor = (CalParallelLight(parallelLight, norm, viewDir, parallelLightDir, texColor.rgb, parallelShadow) * 0.2
+						+ CalPointLight(pointLight, norm, viewDir, pointLightDir, texColor.rgb, pointShadow)) * modelLight;
 
 	FragColor = vec4(textureColor, alpha);
 }
 
 // parallelLight
-vec3 CalParallelLight(ParallelLight parallelLight, vec3 norm, vec3 viewDir, vec3 texColor, float parallelShadow)
+vec3 CalParallelLight(ParallelLight parallelLight, vec3 norm, vec3 viewDir, vec3 parallelLightDir, vec3 texColor, float parallelShadow)
 {
 	vec3 parallelAmbient = (parallelLight.ambient) * texColor;
 	
-	vec3 parallelLightDir = normalize(-parallelLight.direction);
+	//vec3 parallelLightDir = normalize(-parallelLight.direction);
 	float parallelDiff = max(dot(norm, parallelLightDir), 0.0);
 	vec3 parallelDiffuse = (parallelLight.diffuse) * (parallelDiff * texColor);
 
@@ -142,7 +163,7 @@ vec3 CalParallelLight(ParallelLight parallelLight, vec3 norm, vec3 viewDir, vec3
 	return parallelLightColor;
 }
 
-float ShadowCalculation(vec4 FragPosLightSpace, vec3 norm)
+float ShadowCalculation(vec4 FragPosLightSpace, vec3 n)
 {
 	// perform perspective divide
     vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
@@ -155,7 +176,7 @@ float ShadowCalculation(vec4 FragPosLightSpace, vec3 norm)
     float currentDepth = projCoords.z;
     // calculate bias (based on depth map resolution and slope)
     vec3 lightDir = normalize(-parallelLight.direction); 
-    float bias = max(0.01 * (1.0 - dot(norm, lightDir)), 0.001);
+    float bias = max(0.01 * (1.0 - dot(n, lightDir)), 0.001);
     // check whether current frag pos is in shadow
     // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
     // PCF
@@ -179,7 +200,7 @@ float ShadowCalculation(vec4 FragPosLightSpace, vec3 norm)
 }
 
 // pointLight	
-vec3 CalPointLight(PointLight pointLight, vec3 norm, vec3 viewDir, vec3 texColor, float pointShadow)
+vec3 CalPointLight(PointLight pointLight, vec3 norm, vec3 viewDir, vec3 pointLightDir, vec3 texColor, float pointShadow)
 {
 	float distance = length(pointLight.position - fs_in.FragPos);
 	float attenuation;
@@ -190,7 +211,7 @@ vec3 CalPointLight(PointLight pointLight, vec3 norm, vec3 viewDir, vec3 texColor
 	
 	vec3 pointAmbient = (attenuation) *  (pointLight.ambient) * texColor;
 
-	vec3 pointLightDir = normalize(pointLight.position - fs_in.FragPos);
+	//vec3 pointLightDir = normalize(pointLight.position - fs_in.FragPos);
 	float pointDiff = max(dot(norm, pointLightDir), 0.0);
 	vec3 pointDiffuse = (attenuation) * (pointLight.diffuse ) * (pointDiff * texColor);
 
@@ -237,3 +258,45 @@ float PointShadowCalculation(vec3 fragPos)
     return shadow;
 }
 
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{
+	// number of depth layers
+    const float minLayers = 10;
+    const float maxLayers = 20;
+    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+    // calculate the size of each layer
+    float layerDepth = 1.0 / numLayers;
+    // depth of current layer
+    float currentLayerDepth = 0.0;
+    // the amount to shift the texture coordinates per layer (from vector P)
+    vec2 P = viewDir.xy / viewDir.z * height_scale; 
+    vec2 deltaTexCoords = P / numLayers;
+  
+    // get initial values
+    vec2  currentTexCoords     = texCoords;
+    float currentDepthMapValue = texture(height, currentTexCoords).r;
+      
+    while(currentLayerDepth < currentDepthMapValue)
+    {
+        // shift texture coordinates along direction of P
+        currentTexCoords -= deltaTexCoords;
+        // get depthmap value at current texture coordinates
+        currentDepthMapValue = texture(height, currentTexCoords).r;  
+        // get depth of next layer
+        currentLayerDepth += layerDepth;  
+    }
+    
+    // -- parallax occlusion mapping interpolation from here on
+    // get texture coordinates before collision (reverse operations)
+    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+    // get depth after and before collision for linear interpolation
+    float afterDepth  = currentDepthMapValue - currentLayerDepth;
+    float beforeDepth = texture(height, prevTexCoords).r - currentLayerDepth + layerDepth;
+ 
+    // interpolation of texture coordinates
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+    return finalTexCoords;
+}

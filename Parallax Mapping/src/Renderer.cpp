@@ -186,7 +186,6 @@ void Renderer::render()
     glm::mat4 model(1.0f);
     Model& baseball = *models[0];
     Mesh& plane = *meshes[1];
-    //light.Update();
 
     FrameBuffer& msFrameBuffer = *framebuffers[0];
     FrameBuffer& sceneFrameBuffer = *framebuffers[1];
@@ -291,12 +290,17 @@ void Renderer::render()
         shader.setUniform("shadowMap", 1);
         //std::cerr << "Bind Texture slot: 1" << " ID: " << pointShadowFrameBuffer.getDepthCube() << std::endl;
     }
+
     drawMesh(plane, shader);
     shader.setUniform("model", model);
     shader.setUniform("hasNormalMap", false);
+    shader.setUniform("hasHeightMap", false);
     plane.draw();
+
     drawModel(baseball, shader);
     shader.setUniform("hasNormalMap", hasNormal);
+    shader.setUniform("hasHeightMap", hasHeight);
+    shader.setUniform("height_scale", height_scale);
     renderModel(transform, baseball, shader);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, msFrameBuffer.getFBO());
@@ -408,6 +412,9 @@ void Renderer::onImGuiRender()
     ImGui::Checkbox("useGamma", &useGamma);
     ImGui::SameLine();
     ImGui::Checkbox("useNormal", &hasNormal);
+    ImGui::SliderFloat("height_scale", &height_scale, 0.0005f, 0.005f);
+    ImGui::SameLine();
+    ImGui::Checkbox("useHeight", &hasHeight);
 
     transform.onImGuiRender();
 

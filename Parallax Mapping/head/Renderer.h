@@ -52,7 +52,8 @@ private:
 	bool pointShadows = true;
 
 	bool hasNormal = false;
-
+	bool hasHeight = false;
+	float height_scale = 0.001;
 
 public:
 	Renderer(Camera& cam, InputManager& input, Window& win, const std::vector<std::string>& modelPaths);

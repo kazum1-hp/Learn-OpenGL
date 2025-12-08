@@ -13,6 +13,7 @@ Window::Window(const char* title, Camera& cam, InputManager& inputManager, int w
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, title, NULL, NULL);
 	if (window == NULL) {
@@ -52,6 +53,9 @@ void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height
 		// Update camera aspect ratio
 		win -> camera.aspect = (float)width / (float)height;
 	}
+	std::cout << "Framebuffer resized: " << width << " x " << height << std::endl;
+	std::cout << "aspect = " << win->camera.aspect << std::endl;
+
 }
 
 void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)

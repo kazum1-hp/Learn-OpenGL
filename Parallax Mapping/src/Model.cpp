@@ -1,6 +1,6 @@
 #include "../head/Model.h"
 #include <iostream>
-
+#include <filesystem>
 Model::Model(const std::string& path)
 {
 	loadModel(path);
@@ -159,5 +159,24 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
 
 		textures.push_back(loadedTextures[path]);
 	}
+
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
+		std::string file = entry.path().string();
+		std::string lower = file;
+		std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
+		if (lower.find("disp") != std::string::npos ||
+			lower.find("height") != std::string::npos)
+		{
+			std::cout << "[Assimp] Extra Height Map Found: " << file << std::endl;
+
+			if (loadedTextures.find(file) == loadedTextures.end())
+				loadedTextures[file] = std::make_shared<Texture>(file, TextureType::Height);
+
+			textures.push_back(loadedTextures[file]);
+			break;
+		}
+	}
+
 	return textures;
 }

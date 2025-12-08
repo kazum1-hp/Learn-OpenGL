@@ -9,7 +9,7 @@ Application::Application(const char* title)
 	: camera(),
 	  input(camera),
 	  window(title, camera, input),
-	  renderer(camera, input, window, { "../Assets/baseball/baseball_01_4k.gltf" }),
+	  renderer(camera, input, window, { "../Assets/baseball_01_4k/baseball_01_4k.gltf" }),
 	  running(true)
 {
 	if (!window.getWindow())
