@@ -131,14 +131,18 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
     /*skyboxes.push_back(std::make_unique<Skybox>());
     Skybox& skybox = *skyboxes[0];*/
 
-    framebuffers.push_back(std::make_unique<FrameBuffer>(window, true, true, false, false));
-    framebuffers.push_back(std::make_unique<FrameBuffer>(window, false, false, false, false));
-    framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, true, false));
-    framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, false, true));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/true, /*useMs*/true, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/false));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(window, false, false, false, false, useHdr));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, true, false, false));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, false, true, false));
     FrameBuffer& msFrameBuffer = *framebuffers[0];
-    FrameBuffer& sceneFrameBuffer = *framebuffers[1];
+    FrameBuffer& hdrFrameBuffer = *framebuffers[1];
     FrameBuffer& parallelShadowFrameBuffer = *framebuffers[2];
     FrameBuffer& pointShadowFrameBuffer = *framebuffers[3];
+
+    window.onFramebufferResize = [this]() {
+        this->resizeFrameBuffer();
+        };
 
     geometrys.push_back(std::make_unique<Geometry>(quadVertices, indices, attributes));
     geometrys.push_back(std::make_unique<Geometry>(planeVertices, p_indices, f_attributes));
@@ -147,7 +151,7 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
     Geometry& plane = *geometrys[1];
     Geometry& cube  = *geometrys[2];
 
-    std::shared_ptr<Texture> colortexture = std::make_shared <Texture>(sceneFrameBuffer.getColor());
+    std::shared_ptr<Texture> colortexture = std::make_shared <Texture>(hdrFrameBuffer.getColor());
     meshes.push_back(std::make_unique<Mesh>(scene, std::vector<std::shared_ptr<Texture>>{ colortexture }));
     std::shared_ptr<Texture> planeTex = std::make_shared <Texture>("../Assets/wood.png");
     meshes.push_back(std::make_unique<Mesh>(plane, std::vector<std::shared_ptr<Texture>>{ planeTex }));
@@ -188,7 +192,7 @@ void Renderer::render()
     Mesh& plane = *meshes[1];
 
     FrameBuffer& msFrameBuffer = *framebuffers[0];
-    FrameBuffer& sceneFrameBuffer = *framebuffers[1];
+    FrameBuffer& hdrFrameBuffer = *framebuffers[1];
     FrameBuffer& parallelShadowFrameBuffer = *framebuffers[2];
     FrameBuffer& pointShadowFrameBuffer = *framebuffers[3];
     
@@ -304,7 +308,7 @@ void Renderer::render()
     renderModel(transform, baseball, shader);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, msFrameBuffer.getFBO());
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sceneFrameBuffer.getFBO());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hdrFrameBuffer.getFBO());
     glBlitFramebuffer(0, 0, window.getWidth(), window.getHeight(), 
         0, 0, window.getWidth(), window.getHeight(), 
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
@@ -320,8 +324,10 @@ void Renderer::render()
     framebufferShader.setUniform("screenTexture", 0);
     framebufferShader.setUniform("scanPos", scanPos);
     framebufferShader.setUniform("useGamma", useGamma);
+    framebufferShader.setUniform("useHdr", useHdr);
+    framebufferShader.setUniform("exposure", exposure);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, sceneFrameBuffer.getColor());
+    glBindTexture(GL_TEXTURE_2D, hdrFrameBuffer.getColor());
     meshes[0]->draw();
 
     glEnable(GL_DEPTH_TEST);
@@ -384,6 +390,16 @@ void Renderer::renderModel(const Transform& transform, const Model& model, Shade
     model.draw();
 }
 
+void Renderer::resizeFrameBuffer()
+{
+    FrameBuffer& msFrameBuffer = *framebuffers[0];
+    FrameBuffer& sceneFrameBuffer = *framebuffers[1];
+    msFrameBuffer.resize(window.getWidth(), window.getHeight());
+    sceneFrameBuffer.resize(window.getWidth(), window.getHeight());
+
+    camera.aspect = (float)window.getWidth() / (float)window.getHeight();
+}
+
 void Renderer::onImGuiRender()
 {
     ImGui::Begin("Post Processing");
@@ -412,9 +428,14 @@ void Renderer::onImGuiRender()
     ImGui::Checkbox("useGamma", &useGamma);
     ImGui::SameLine();
     ImGui::Checkbox("useNormal", &hasNormal);
-    ImGui::SliderFloat("height_scale", &height_scale, 0.0005f, 0.005f);
+    
+    ImGui::SliderFloat("height_scale", &height_scale, 0.0005f, 0.01f);
     ImGui::SameLine();
     ImGui::Checkbox("useHeight", &hasHeight);
+    
+    ImGui::SliderFloat("Exposure", &exposure, 0.01f, 10.0f);
+    ImGui::SameLine();
+    ImGui::Checkbox("useHdr", &useHdr);
 
     transform.onImGuiRender();
 

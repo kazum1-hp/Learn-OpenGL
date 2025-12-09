@@ -2,8 +2,8 @@
 #include <iostream>
 
 
-Window::Window(const char* title, Camera& cam, InputManager& inputManager, int width, int height)
-	:camera(cam), input(inputManager), SCR_WIDTH(width), SCR_HEIGHT(height)
+Window::Window(const char* title, InputManager& inputManager, int width, int height)
+	: input(inputManager), SCR_WIDTH(width), SCR_HEIGHT(height)
 {
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW." << std::endl;
@@ -20,6 +20,15 @@ Window::Window(const char* title, Camera& cam, InputManager& inputManager, int w
 		std::cerr << "Failed to create GLFW window." << std::endl;
 		glfwTerminate();
 	}
+
+	// get primary monitor and set init window pos
+	GLFWmonitor* primary = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(primary);
+
+	int xpos = (mode->width - SCR_WIDTH) / 2;
+	int ypos = (mode->height - SCR_HEIGHT) / 2;
+
+	glfwSetWindowPos(window, xpos, ypos);
 
 	glfwMakeContextCurrent(window);
 
@@ -43,6 +52,10 @@ Window::~Window()
 
 void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+	if (width == 0 || height == 0) {
+		return;
+	}
+
 	glViewport(0, 0, width, height);
 
 	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -50,12 +63,14 @@ void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height
 	{
 		win -> SCR_WIDTH = width;
 		win -> SCR_HEIGHT = height;
-		// Update camera aspect ratio
-		win -> camera.aspect = (float)width / (float)height;
-	}
-	std::cout << "Framebuffer resized: " << width << " x " << height << std::endl;
-	std::cout << "aspect = " << win->camera.aspect << std::endl;
 
+		std::cout << "Framebuffer resized: " << width << " x " << height << std::endl;
+
+		if (win->onFramebufferResize) {
+			win->onFramebufferResize();
+		}
+	}
+	
 }
 
 void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)

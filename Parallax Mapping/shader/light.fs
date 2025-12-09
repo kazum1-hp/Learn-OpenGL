@@ -90,7 +90,7 @@ void main()
 	vec3 T = normalize(fs_in.Tangent);
 	T = normalize(T - dot(T, N) * N);
 	vec3 B = cross(T, N);
-	mat3 TBN = transpose(mat3(T, B, N));
+	mat3 TBN = mat3(T, B, N);
 
 	vec3 norm = N;
 	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
@@ -100,8 +100,8 @@ void main()
 
 	if (hasHeightMap)
 	{
-		viewDir = normalize(TBN * viewDir);
-		texCoords = ParallaxMapping(fs_in.TexCoord,  viewDir);
+		viewDir = normalize(transpose(TBN) * viewDir);
+		texCoords = ParallaxMapping(fs_in.TexCoord, viewDir);
 	
 		 // discards a fragment when sampling outside default texture region (fixes border artifacts)
 		if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
@@ -112,11 +112,9 @@ void main()
 	{
 		vec3 normalTex = texture(normal, texCoords).xyz;
 		normalTex = normalTex * 2.0 - 1.0;
-		norm = normalize(normalTex);
-
-		viewDir = normalize(TBN * viewDir);
-		parallelLightDir = normalize(TBN * parallelLightDir);
-		pointLightDir = normalize(TBN * pointLightDir);
+		// 如果 Y 通道反了：
+		//normalTex.y = -normalTex.y;
+		norm = normalize(TBN * normalTex);
 	}
 	
 	vec4 texColor = texture(diffuse, texCoords);
@@ -131,7 +129,7 @@ void main()
 	float parallelShadow = parallelShadows ? ShadowCalculation(fs_in.FragPosLightSpace, N) : 0.0;
 	float pointShadow = pointShadows ? PointShadowCalculation(fs_in.FragPos) : 0.0;
 
-	vec3 textureColor = (CalParallelLight(parallelLight, norm, viewDir, parallelLightDir, texColor.rgb, parallelShadow) * 0.2
+	vec3 textureColor = (CalParallelLight(parallelLight, norm, viewDir, parallelLightDir, texColor.rgb, parallelShadow) 
 						+ CalPointLight(pointLight, norm, viewDir, pointLightDir, texColor.rgb, pointShadow)) * modelLight;
 
 	FragColor = vec4(textureColor, alpha);

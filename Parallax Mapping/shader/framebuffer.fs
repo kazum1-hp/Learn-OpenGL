@@ -8,6 +8,9 @@ uniform float offset;
 uniform float scanPos;
 uniform bool useGamma;
 
+uniform bool useHdr;
+uniform float exposure;
+
 float gamma = 2.2;
 
 float sharpnKernel[9] = float[](
@@ -68,10 +71,22 @@ void main()
             for(int i = 0; i < 9; i++)
                 color += sampleTex[i] * blurKernel[i];
         }
-        if (useGamma)
-            FragColor = vec4(pow(color, vec3(1.0 / gamma)), 1.0);
+
+        vec3 result;
+        if (useHdr)
+        {
+            // reinhard
+            //result = color / (color + vec3(1.0));
+            // exposure
+            result = vec3(1.0) - exp(-color * exposure);
+        }
         else
-            FragColor = vec4(color, 1.0);
+            result = color;
+
+        if (useGamma)
+            FragColor = vec4(pow(result, vec3(1.0 / gamma)), 1.0);
+        else
+            FragColor = vec4(result, 1.0);
     }
         
     else

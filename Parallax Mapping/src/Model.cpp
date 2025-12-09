@@ -160,7 +160,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
 		textures.push_back(loadedTextures[path]);
 	}
 
-	for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
+	/*for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
 		std::string file = entry.path().string();
 		std::string lower = file;
 		std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
@@ -176,7 +176,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
 			textures.push_back(loadedTextures[file]);
 			break;
 		}
-	}
+	}*/
 
 	return textures;
 }

@@ -1,34 +1,41 @@
 #include "../head/FrameBuffer.h"
 #include <iostream>
 
-FrameBuffer::FrameBuffer(Window& window, bool useDepth, bool useMs, bool useDepthMap2D, bool useDepthCube)
-	: width(window.getWidth()), height(window.getHeight())
+FrameBuffer::FrameBuffer(Window& window, bool useDepth, bool useMs, bool useDepthMap2D, bool useDepthCube, bool useHdr)
+	: width(window.getWidth()), height(window.getHeight()),
+      m_useDepth(useDepth), m_useMs(useMs), m_useDepthMap2D(useDepthMap2D), m_useDepthCube(useDepthCube),m_useHdr(useHdr)
 {
-	init(width, height, useDepth, useMs, useDepthMap2D, useDepthCube);
+	init(width, height);
 }
 
-FrameBuffer::FrameBuffer(unsigned int w, unsigned int h, bool useDepth, bool useMs, bool useDepthMap2D, bool useDepthCube)
-	: width(w), height(h)
+FrameBuffer::FrameBuffer(unsigned int w, unsigned int h, bool useDepth, bool useMs, bool useDepthMap2D, bool useDepthCube, bool useHdr)
+	: width(w), height(h),
+      m_useDepth(useDepth), m_useMs(useMs), m_useDepthMap2D(useDepthMap2D), m_useDepthCube(useDepthCube),m_useHdr(useHdr)
 {
-	init(width, height, useDepth, useMs, useDepthMap2D, useDepthCube);
+	init(width, height);
 }
 
-void FrameBuffer::init(unsigned int w, unsigned int h, bool useDepth, bool useMs, bool useDepthMap2D, bool useDepthCube)
+void FrameBuffer::init(unsigned int w, unsigned int h)
 {
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
     // color attachment (non-MSAA)
-    if (!useMs && !useDepthMap2D && !useDepthCube) {
+    if (!m_useMs && !m_useDepthMap2D && !m_useDepthCube) {
         glGenTextures(1, &texColor);
         glBindTexture(GL_TEXTURE_2D, texColor);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+        // useHdr or not
+        GLenum internalFormat = m_useHdr ? GL_RGBA16F : GL_RGB;
+        GLenum format = m_useHdr ? GL_RGBA : GL_RGB;
+
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, format, GL_UNSIGNED_BYTE, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColor, 0);
 
     }
-    else if (useMs && !useDepthMap2D && !useDepthCube) {
+    else if (m_useMs && !m_useDepthMap2D && !m_useDepthCube) {
         // multisample color texture attachment
         glGenTextures(1, &texColor);
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texColor);
@@ -42,7 +49,7 @@ void FrameBuffer::init(unsigned int w, unsigned int h, bool useDepth, bool useMs
     // 2) useDepthCube  => create and attach a cube depth texture (for point light shadow maps)
     // 3) useDepth (renderbuffer) => create RBO depth/stencil
 
-    if (useDepthMap2D) {
+    if (m_useDepthMap2D) {
         // create 2D depth texture
         glGenTextures(1, &texDepth2D);
         glBindTexture(GL_TEXTURE_2D, texDepth2D);
@@ -60,7 +67,7 @@ void FrameBuffer::init(unsigned int w, unsigned int h, bool useDepth, bool useMs
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
     }
-    else if (useDepthCube) {
+    else if (m_useDepthCube) {
         // create cube depth texture
         glGenTextures(1, &texDepthCube);
         glBindTexture(GL_TEXTURE_CUBE_MAP, texDepthCube);
@@ -79,11 +86,11 @@ void FrameBuffer::init(unsigned int w, unsigned int h, bool useDepth, bool useMs
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
     }
-    else if (useDepth) {
+    else if (m_useDepth) {
         // renderbuffer depth/stencil
         glGenRenderbuffers(1, &RBO);
         glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-        if (useMs) {
+        if (m_useMs) {
             // multisample RBO handled elsewhere in code path; but keep here for completeness
             glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, w, h);
         }
@@ -98,6 +105,42 @@ void FrameBuffer::init(unsigned int w, unsigned int h, bool useDepth, bool useMs
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FrameBuffer::resize(unsigned int newWidth, unsigned int newHeight)
+{
+    if (newWidth == width && newHeight == height) {
+        return;  // No change needed
+    }
+
+    // Clean up existing resources (similar to destructor)
+    if (texColor) {
+        glDeleteTextures(1, &texColor);
+        texColor = 0;
+    }
+    if (texDepth2D) {
+        glDeleteTextures(1, &texDepth2D);
+        texDepth2D = 0;
+    }
+    if (texDepthCube) {
+        glDeleteTextures(1, &texDepthCube);
+        texDepthCube = 0;
+    }
+    if (RBO) {
+        glDeleteRenderbuffers(1, &RBO);
+        RBO = 0;
+    }
+    if (FBO) {
+        glDeleteFramebuffers(1, &FBO);
+        FBO = 0;
+    }
+
+    // Update dimensions
+    width = newWidth;
+    height = newHeight;
+
+    // Re-initialize with new size
+    init(width, height);
 }
 
 FrameBuffer::~FrameBuffer()

@@ -28,13 +28,15 @@ void main()
 
 	vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
 
+	mat3 normalMatrix = transpose(inverse(mat3(model)));
+
 	if(reverse_normals)
-		vs_out.Normal = transpose(inverse(mat3(model))) * (-1.0 * aNormal);
+		vs_out.Normal = normalMatrix * (-1.0 * aNormal);
 	else
-		vs_out.Normal = transpose(inverse(mat3(model))) * aNormal;
+		vs_out.Normal = normalMatrix * aNormal;
 	
-	vs_out.Tangent = vec3(model * vec4(aTangent, 0.0));
-	vs_out.Bitangent = vec3(model * vec4(aBitangent, 0.0));
+	vs_out.Tangent = vec3(normalMatrix * aTangent);
+	vs_out.Bitangent = vec3(normalMatrix * aBitangent);
 
     vs_out.TexCoord = aTexCoord;
 

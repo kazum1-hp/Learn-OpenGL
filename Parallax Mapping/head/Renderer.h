@@ -53,7 +53,10 @@ private:
 
 	bool hasNormal = false;
 	bool hasHeight = false;
-	float height_scale = 0.001;
+	float height_scale = 0.001f;
+
+	bool useHdr = false;
+	float exposure = 1.0f;
 
 public:
 	Renderer(Camera& cam, InputManager& input, Window& win, const std::vector<std::string>& modelPaths);
@@ -61,6 +64,7 @@ public:
 	void renderModel(const Transform& transform, const Model& model, Shader& shader);
 	void drawMesh(const Mesh& mesh, Shader& shader) const;
 	void drawModel(const Model& model, Shader& shader) const;
+	void resizeFrameBuffer();
 	void onImGuiRender();
 };
 

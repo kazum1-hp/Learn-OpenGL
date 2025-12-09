@@ -9,9 +9,13 @@
 class Light
 {
 public:
-	Light();
+	Light(glm::vec3 colour = glm::vec3(1.0f), glm::vec3 pos = glm::vec3(-6.0f, 6.0f, 6.0f), glm::vec3 dir = glm::vec3(-2.2f, -2.0f, -2.3f));
 
 	void Update();
+
+	void setColor(glm::vec3 colour) { color = colour; }
+	void setLightPos(glm::vec3 pos) { position = pos; }
+	void setLightDir(glm::vec3 dir) { direction = dir; }
 
 	glm::vec3 getAmbient() const {
 		return ambient * color;

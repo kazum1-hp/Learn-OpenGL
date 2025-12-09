@@ -8,8 +8,8 @@
 Application::Application(const char* title)
 	: camera(),
 	  input(camera),
-	  window(title, camera, input),
-	  renderer(camera, input, window, { "../Assets/baseball_01_4k/baseball_01_4k.gltf" }),
+	  window(title, input),
+	  renderer(camera, input, window, { "../Assets/mid_century_lounge_chair/mid_century_lounge_chair_4k.gltf" }),
 	  running(true)
 {
 	if (!window.getWindow())
