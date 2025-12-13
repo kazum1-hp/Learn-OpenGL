@@ -125,7 +125,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 	std::vector<std::shared_ptr<Texture>> meshTextures; 
-	for (int type = aiTextureType_DIFFUSE; type <= aiTextureType_NORMALS; ++type) {
+	for (int type = aiTextureType_DIFFUSE; type <= AI_TEXTURE_TYPE_MAX; ++type) {
 		auto textures = loadMaterialTextures(material, static_cast<aiTextureType>(type), std::to_string(type));
 		meshTextures.insert(meshTextures.end(), textures.begin(), textures.end());
 	}

@@ -6,10 +6,16 @@
 #include "../external/imgui/imgui.h"
 #include <array>
 
+enum class LightType {
+	Directional,
+	Point
+};
+
 class Light
 {
 public:
-	Light(glm::vec3 colour = glm::vec3(1.0f), glm::vec3 pos = glm::vec3(-6.0f, 6.0f, 6.0f), glm::vec3 dir = glm::vec3(-2.2f, -2.0f, -2.3f));
+	//Light(glm::vec3 colour = glm::vec3(1.0f), glm::vec3 pos = glm::vec3(-6.0f, 6.0f, 6.0f), glm::vec3 dir = glm::vec3(-2.2f, -2.0f, -2.3f));
+	Light(glm::vec3 color, glm::vec3 dirOrPos, LightType type);
 
 	void Update();
 
@@ -54,13 +60,17 @@ public:
 		return shadowTransforms[i];
 	}
 	GLfloat getFar() const { return far; }
+	bool lightOn() const { return enabled; }
 
-	void onImGuiRender();
+	void dirOnImGuiRender();
+	void pointOnImGuiRender(int index);
 
 private:
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
+	LightType type;
+
+	glm::vec3 ambient = glm::vec3(0.05f);
+	glm::vec3 diffuse = glm::vec3(1.0f);
+	glm::vec3 specular = glm::vec3(0.3f);
 	glm::vec3 color;
 	glm::vec3 position;
 	glm::vec3 direction;
@@ -74,5 +84,7 @@ private:
 	GLfloat near = 1.0f, far = 30.0f;
 	GLfloat aspect = 1024.0f / 1024.0f;
 	float speed = 0.2f;
+
+	bool enabled = true;
 };
 

@@ -56,43 +56,31 @@ std::vector<float> cube_vertices {
     -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left    0
      1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right  1
      1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right  2       
-    // 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right  1
-    //-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left    0
     -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left   3
     // front face
     -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left    4
      1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right   5
      1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right  6
-   //  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right  6
     -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left   7
-   // -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left    4
     // left face
     -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right  8
     -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left   9
     -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left    10
-   // -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left    10
     -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right   11
-   // -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right  8
     // right face
      1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left   12
      1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right   13
      1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right       14  
-    // 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right      13
-    // 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left   12
      1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     15
      // bottom face
      -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right 16
       1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left  17
       1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left   18
-    //  1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left   18
      -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right  19
-    // -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right 16
      // top face
      -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left  20
       1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right  21
       1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right         22
-     // 1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right  21
-    // -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left  20
      -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left     23      
 };
 
@@ -120,25 +108,39 @@ std::vector<VertexAttribute> cube_attributes = {
 Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vector<std::string>& modelPaths)
     :camera(cam),
      input(input),
-     window(win)
+     window(win),
+     dirLight(glm::vec3(1.0f), glm::vec3(-2.2f, -2.0f, -2.3f), LightType::Directional)
 {
     for (const auto& path : modelPaths) {
         models.push_back(std::make_unique<Model>(path));
     }
     
-    transform.setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
-    transform.setScale(glm::vec3(10.0f));
+    pointLights.push_back(Light(glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(0.0f, 0.5f, 1.5f), LightType::Point));
+    pointLights.push_back(Light(glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(-4.0f, 0.5f, -3.0f), LightType::Point));
+    pointLights.push_back(Light(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(3.0f, 0.5f, 1.0f), LightType::Point));
+    pointLights.push_back(Light(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(-0.8f, 2.4f, -1.0f), LightType::Point));
+
+    transform.setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
+    transform.setScale(glm::vec3(1.0f));
     /*skyboxes.push_back(std::make_unique<Skybox>());
     Skybox& skybox = *skyboxes[0];*/
 
-    framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/true, /*useMs*/true, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/false));
-    framebuffers.push_back(std::make_unique<FrameBuffer>(window, false, false, false, false, useHdr));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/true, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/useHdr, 2));
     framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, true, false, false));
-    framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, false, true, false));
-    FrameBuffer& msFrameBuffer = *framebuffers[0];
-    FrameBuffer& hdrFrameBuffer = *framebuffers[1];
-    FrameBuffer& parallelShadowFrameBuffer = *framebuffers[2];
-    FrameBuffer& pointShadowFrameBuffer = *framebuffers[3];
+
+    pingpongFrameBuffer[0] = std::make_unique<FrameBuffer>(window, false, false, false, false, true);
+    pingpongFrameBuffer[1] = std::make_unique<FrameBuffer>(window, false, false, false, false, true);
+
+    for (int i = 0; i < pointLights.size(); i++)
+    {
+        pointShadowFramebuffers.push_back(
+            std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size,
+                false, false,
+                false,  // useDepthMap2D
+                true,   // useDepthCube
+                false)  // useHdr
+        );
+    }
 
     window.onFramebufferResize = [this]() {
         this->resizeFrameBuffer();
@@ -151,31 +153,39 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
     Geometry& plane = *geometrys[1];
     Geometry& cube  = *geometrys[2];
 
-    std::shared_ptr<Texture> colortexture = std::make_shared <Texture>(hdrFrameBuffer.getColor());
-    meshes.push_back(std::make_unique<Mesh>(scene, std::vector<std::shared_ptr<Texture>>{ colortexture }));
+    meshes.push_back(std::make_unique<Mesh>(scene));
     std::shared_ptr<Texture> planeTex = std::make_shared <Texture>("../Assets/wood.png");
     meshes.push_back(std::make_unique<Mesh>(plane, std::vector<std::shared_ptr<Texture>>{ planeTex }));
+    meshes.push_back(std::make_unique<Mesh>(cube));
 
+    shaders.push_back(std::make_unique<Shader>("shader/model.vs", "shader/model.fs"));    // model shader
     shaders.push_back(std::make_unique<Shader>("shader/light.vs", "shader/light.fs"));    // light shader
     shaders.push_back(std::make_unique<Shader>("shader/framebuffer.vs", "shader/framebuffer.fs"));    // framebuffer shader
     shaders.push_back(std::make_unique<Shader>("shader/skybox.vs", "shader/skybox.fs"));    // skybox shader
     shaders.push_back(std::make_unique<Shader>("shader/shadow.vs", "shader/shadow.fs"));    // shadow shader
     shaders.push_back(std::make_unique<Shader>("shader/pointShadow.vs", "shader/pointShadow.fs", "shader/pointShadow.gs"));    // shadow shader
+    shaders.push_back(std::make_unique<Shader>("shader/bloomBlur.vs", "shader/bloomBlur.fs"));    // bloomBlur shader
 
     Shader& shader = *shaders[0];
     shader.use();
-
+    
     materials.push_back(std::make_unique<Material>("material"));
     Material& material = *materials[0];
 
-    //shader.setUniform("textures", 0);
-    //shader.setUniform("depthMap", 1);
-    //shader.setUniform("shadowMap", 2);
-
     shader.setUniform("material.shininess", material.getShininess());
-    shader.setUniform("pointLight.constant", 1.0f);
-    shader.setUniform("pointLight.linear", 0.09f);
-    shader.setUniform("pointLight.quadratic", 0.032f);
+    for (int i = 0; i < pointLights.size(); i++)
+    {
+        auto& light = pointLights[i];
+        std::string base = "pointLight[" + std::to_string(i) + "]";
+
+        shader.setUniform(base + ".constant", 1.0f);
+        shader.setUniform(base + ".linear", 0.09f);
+        shader.setUniform(base + ".quadratic", 0.032f);
+    }
+
+    Shader& blurShader = *shaders[6];
+    blurShader.use();
+    blurShader.setUniform("image", 0);
 
     // --- glEnable ---
     glEnable(GL_DEPTH_TEST);
@@ -186,15 +196,14 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
 
 void Renderer::render()
 {
-    glm::mat4 LightSpaceMatrix = light.getOrthoMatrix() * light.getOrthoViewMatrix();
+    glm::mat4 LightSpaceMatrix = dirLight.getOrthoMatrix() * dirLight.getOrthoViewMatrix();
     glm::mat4 model(1.0f);
     Model& baseball = *models[0];
     Mesh& plane = *meshes[1];
+    Mesh& cube = *meshes[2];
 
-    FrameBuffer& msFrameBuffer = *framebuffers[0];
-    FrameBuffer& hdrFrameBuffer = *framebuffers[1];
-    FrameBuffer& parallelShadowFrameBuffer = *framebuffers[2];
-    FrameBuffer& pointShadowFrameBuffer = *framebuffers[3];
+    FrameBuffer& hdrFrameBuffer = *framebuffers[0];
+    FrameBuffer& parallelShadowFrameBuffer = *framebuffers[1];
     
     glViewport(0, 0, SHADOW_Size, SHADOW_Size);
 
@@ -203,7 +212,7 @@ void Renderer::render()
         glBindFramebuffer(GL_FRAMEBUFFER, parallelShadowFrameBuffer.getFBO());
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        Shader& shadowShader = *shaders[3];
+        Shader& shadowShader = *shaders[4];
         shadowShader.use();
 
         shadowShader.setUniform("lightSpaceMatrix", LightSpaceMatrix);
@@ -214,28 +223,35 @@ void Renderer::render()
 
     if (input.isPointLightOn())
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, pointShadowFrameBuffer.getFBO());
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-        Shader& shadowShader = *shaders[4];
+        Shader& shadowShader = *shaders[5];
         shadowShader.use();
 
-        for (GLuint i = 0; i < 6; ++i)
+        for (int i = 0; i < pointLights.size(); i++)
         {
-            shadowShader.setUniform("shadowMatrices[" + std::to_string(i) + "]", light.getPerspTransMatrix(i));
-        }
+            FrameBuffer& fbo = *pointShadowFramebuffers[i];
 
-        shadowShader.setUniform("far_plane", light.getFar());
-        shadowShader.setUniform("lightPos", light.getLightPos());
-        shadowShader.setUniform("model", model);
-        plane.draw();
-        renderModel(transform, baseball, shadowShader);
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo.getFBO());
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            for (GLuint j = 0; j < 6; ++j)
+            {
+                shadowShader.setUniform("shadowMatrices[" + std::to_string(j) + "]", pointLights[i].getPerspTransMatrix(j));
+            }
+
+            shadowShader.setUniform("far_plane", pointLights[i].getFar());
+            shadowShader.setUniform("lightPos", pointLights[i].getLightPos());
+
+            shadowShader.setUniform("model", model);
+            plane.draw();
+
+            renderModel(transform, baseball, shadowShader);
+        }
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glViewport(0, 0, window.getWidth(), window.getHeight());
-    glBindFramebuffer(GL_FRAMEBUFFER, msFrameBuffer.getFBO());
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer.getFBO());
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -254,25 +270,13 @@ void Renderer::render()
     shader.setUniform("modelLight", modelLight);
 
     // paralleLight
-    shader.setUniform("parallelLight.ambient", light.getAmbient() * light.getColor());
-    shader.setUniform("parallelLight.diffuse", light.getDiffuse() * light.getColor());
-    shader.setUniform("parallelLight.specular", light.getSpecular() * light.getColor());
-    shader.setUniform("parallelLight.direction", light.getLightDir());
+    shader.setUniform("parallelLight.ambient", dirLight.getAmbient() * dirLight.getColor());
+    shader.setUniform("parallelLight.diffuse", dirLight.getDiffuse() * dirLight.getColor());
+    shader.setUniform("parallelLight.specular", dirLight.getSpecular() * dirLight.getColor());
+    shader.setUniform("parallelLight.direction", dirLight.getLightDir());
     shader.setUniform("parallelLight.enabled", input.isParallelLightOn());
     shader.setUniform("lightSpaceMatrix", LightSpaceMatrix);
     shader.setUniform("parallelShadows", parallelShadows);
-
-    //point light
-    shader.setUniform("pointLight.ambient", light.getAmbient() * light.getColor());
-    shader.setUniform("pointLight.diffuse", light.getDiffuse() * light.getColor());
-    shader.setUniform("pointLight.specular", light.getSpecular() * light.getColor());
-    shader.setUniform("pointLight.position", light.getLightPos());
-    shader.setUniform("pointLight.enabled", input.isPointLightOn());
-    shader.setUniform("far_plane", light.getFar());
-    shader.setUniform("pointShadows", pointShadows);
-
-    // plane
-    //shader.setUniform("textures", 0);
 
     if (input.isParallelLightOn())
     {
@@ -282,17 +286,30 @@ void Renderer::render()
         glBindTexture(GL_TEXTURE_2D, parallelShadowFrameBuffer.getDepth2D());
 
         shader.setUniform("depthMap", 0);
-        //std::cerr << "Bind Texture slot: 0" << " ID: " << parallelShadowFrameBuffer.getDepth2D() << std::endl;
     }
     else pointShadows = true;
 
-    if (input.isPointLightOn())
-    {
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, pointShadowFrameBuffer.getDepthCube());
+    //point light
+    shader.setUniform("pointShadows", pointShadows);
 
-        shader.setUniform("shadowMap", 1);
-        //std::cerr << "Bind Texture slot: 1" << " ID: " << pointShadowFrameBuffer.getDepthCube() << std::endl;
+    for (int i = 0; i < pointLights.size(); i++)
+    {
+        std::string base = "pointLight[" + std::to_string(i) + "]";
+
+        shader.setUniform(base + ".ambient", pointLights[i].getAmbient() * pointLights[i].getColor());
+        shader.setUniform(base + ".diffuse", pointLights[i].getDiffuse() * pointLights[i].getColor());
+        shader.setUniform(base + ".specular", pointLights[i].getSpecular() * pointLights[i].getColor());
+        shader.setUniform(base + ".position", pointLights[i].getLightPos());
+        shader.setUniform(base + ".enabled", pointLights[i].lightOn() && input.isPointLightOn());
+        shader.setUniform("far_plane", pointLights[i].getFar());
+
+        if (input.isPointLightOn())
+        {
+            glActiveTexture(GL_TEXTURE1 + i);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, pointShadowFramebuffers[i]->getDepthCube());
+
+            shader.setUniform("shadowMap[" + std::to_string(i) + "]", 1 + i);
+        }
     }
 
     drawMesh(plane, shader);
@@ -307,38 +324,75 @@ void Renderer::render()
     shader.setUniform("height_scale", height_scale);
     renderModel(transform, baseball, shader);
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, msFrameBuffer.getFBO());
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hdrFrameBuffer.getFBO());
-    glBlitFramebuffer(0, 0, window.getWidth(), window.getHeight(), 
-        0, 0, window.getWidth(), window.getHeight(), 
-        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    Shader& LightShader = *shaders[1];
+    LightShader.use();
+
+    // transform matrix
+    LightShader.setUniform("view", camera.getViewMatrix());
+    LightShader.setUniform("projection", camera.getProjectionMatrix());
+
+    for (int i = 0; i < pointLights.size(); i++)
+    {
+        glm::mat4 lightModel(1.0f);
+        lightModel = glm::translate(model, pointLights[i].getLightPos());
+        lightModel = glm::scale(lightModel, glm::vec3(0.25f));
+        LightShader.setUniform("model", lightModel);
+        LightShader.setUniform("lightColor", pointLights[i].getColor());
+        LightShader.setUniform("enabled", pointLights[i].lightOn() && input.isPointLightOn());
+        cube.draw();
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_DEPTH_TEST);
 
+    bool horizontal = true, first_iteration = true;
+    unsigned int amount = 10;
+    Shader& blurShader = *shaders[6];
+    blurShader.use();
+    blurShader.setUniform("samplerDistance", samplerDistance);
+
+    for (unsigned int i = 0; i < amount; i++)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, pingpongFrameBuffer[horizontal]->getFBO());
+        blurShader.setUniform("horizontal", horizontal);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, first_iteration ? hdrFrameBuffer.getColor(1) : pingpongFrameBuffer[!horizontal]->getColor());  // bind texture of other framebuffer (or scene if first iteration)
+        meshes[0]->draw();
+        horizontal = !horizontal;
+        if (first_iteration)
+            first_iteration = false;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     // framebuffer
-    Shader& framebufferShader = *shaders[1];
+    Shader& framebufferShader = *shaders[2];
     framebufferShader.use();
 
     framebufferShader.setUniform("effectMode", effectMode);
     framebufferShader.setUniform("offset", offset);
     framebufferShader.setUniform("screenTexture", 0);
+    framebufferShader.setUniform("blur", 1);
     framebufferShader.setUniform("scanPos", scanPos);
     framebufferShader.setUniform("useGamma", useGamma);
     framebufferShader.setUniform("useHdr", useHdr);
+    framebufferShader.setUniform("useBloom", useBloom);
     framebufferShader.setUniform("exposure", exposure);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, hdrFrameBuffer.getColor());
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, pingpongFrameBuffer[!horizontal]->getColor());
     meshes[0]->draw();
 
-    glEnable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void Renderer::drawMesh(const Mesh& mesh, Shader& shader) const
 {
 
-    GLuint slot = 2; // 0 = depthMap, 1 = shadowMap
+    GLuint slot = 6; // 0 = depthMap, 1-5 = shadowMap
 
     for (const auto& tex : mesh.getTexture())
     {
@@ -364,12 +418,8 @@ void Renderer::drawMesh(const Mesh& mesh, Shader& shader) const
         }
 
         shader.setUniform(uniformName, static_cast<int>(slot));
-        //std::cerr << "Bind Texture slot: " << slot << " ID: " << tex->getID() << " Path: " << tex->getPath() << " uniform: " << uniformName << std::endl;
         slot++;
     }
-    
-    //shader.setUniform("hasNormalMap", hasNormal);
-    //mesh.draw();
 }
 
 void Renderer::drawModel(const Model& model, Shader& shader) const
@@ -384,9 +434,8 @@ void Renderer::renderModel(const Transform& transform, const Model& model, Shade
 {
     glm::mat4 modelMatrix = transform.getModelMatrix();
 
-    //Model& treasure = *models[0];
     shader.setUniform("model", modelMatrix);
-    //drawModel(treasure, shader);
+
     model.draw();
 }
 
@@ -405,22 +454,23 @@ void Renderer::onImGuiRender()
     ImGui::Begin("Post Processing");
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
-    light.onImGuiRender();
-    ImGui::Combo("Effect Mode", &effectMode, "normal\0inversion\0grayscale\0sharpen\0blur\0\0");
-    if (effectMode == 3 || effectMode == 4)
+    //dirLight.dirOnImGuiRender();
+    for (int i = 0; i < pointLights.size(); ++i)
     {
-        ImGui::SliderFloat("Offset", &offset, 100.0f, 1000.0f);
+        pointLights[i].pointOnImGuiRender(i);
     }
+
+
+    //ImGui::Combo("Effect Mode", &effectMode, "normal\0inversion\0grayscale\0sharpen\0blur\0\0");
+    //if (effectMode == 3 || effectMode == 4)
+    //{
+    //    ImGui::SliderFloat("Offset", &offset, 100.0f, 1000.0f);
+    //}
     ImGui::SliderFloat("Model Light", &modelLight, 0.1f, 1.0f);
-    ImGui::SliderFloat("Scan Pos", &scanPos, 0.0f, static_cast<float>(window.getWidth()));
+    //ImGui::SliderFloat("Scan Pos", &scanPos, 0.0f, static_cast<float>(window.getWidth()));
     input.onImGuiRender();
 
-    if (ImGui::Checkbox("MSAA", &useMSAA))
-    {
-        // rebulid FrameBuffer
-        framebuffers[0] = std::make_unique<FrameBuffer>(window, true, useMSAA, false);
-    }
-    ImGui::SameLine();
+    //ImGui::SameLine();
     ImGui::Checkbox("useBinnPhong", &useBlinnPhong);
     ImGui::SameLine();
     ImGui::Checkbox("useQuadratic", &useQuadratic);
@@ -436,6 +486,10 @@ void Renderer::onImGuiRender()
     ImGui::SliderFloat("Exposure", &exposure, 0.01f, 10.0f);
     ImGui::SameLine();
     ImGui::Checkbox("useHdr", &useHdr);
+
+    ImGui::SliderFloat("samplerDistance", &samplerDistance, 0.01f, 10.0f);
+    ImGui::SameLine();
+    ImGui::Checkbox("useBloom", &useBloom);
 
     transform.onImGuiRender();
 

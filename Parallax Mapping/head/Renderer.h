@@ -21,8 +21,11 @@ private:
 	std::vector<std::unique_ptr<Geometry>> geometrys;
 	std::vector<std::unique_ptr<Mesh>> meshes;
 	std::vector<std::unique_ptr<FrameBuffer>> framebuffers;
+	std::unique_ptr<FrameBuffer> pingpongFrameBuffer[2];
+	std::vector<std::unique_ptr<FrameBuffer>> pointShadowFramebuffers;
 	std::vector<std::unique_ptr<Skybox>> skyboxes;
-	Light light;
+	Light dirLight;
+	std::vector<Light> pointLights;
 	Camera& camera;
 	InputManager& input;
 	std::vector<std::unique_ptr<Shader>> shaders;
@@ -54,8 +57,9 @@ private:
 	bool hasNormal = false;
 	bool hasHeight = false;
 	float height_scale = 0.001f;
-
-	bool useHdr = false;
+	float samplerDistance = 1.0f;
+	bool useHdr = true;
+	bool useBloom = true;
 	float exposure = 1.0f;
 
 public:

@@ -3,12 +3,14 @@ out vec4 FragColor;
 
 in vec2 TexCoords;
 uniform sampler2D screenTexture;
+uniform sampler2D blur;
 uniform int effectMode;
 uniform float offset;
 uniform float scanPos;
 uniform bool useGamma;
 
 uniform bool useHdr;
+uniform bool useBloom;
 uniform float exposure;
 
 float gamma = 2.2;
@@ -73,8 +75,12 @@ void main()
         }
 
         vec3 result;
+        vec3 bloomColor = texture(blur, TexCoords).rgb;
+
         if (useHdr)
         {
+            if (useBloom)
+                color += bloomColor;
             // reinhard
             //result = color / (color + vec3(1.0));
             // exposure

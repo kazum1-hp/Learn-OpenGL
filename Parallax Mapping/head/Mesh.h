@@ -9,7 +9,7 @@
 class Mesh
 {
 public:
-	Mesh(const Geometry& geometry, const std::vector<std::shared_ptr<Texture>>& texs);
+	Mesh(const Geometry& geometry, const std::vector<std::shared_ptr<Texture>>& texs = {});
 	~Mesh();
 
 	void draw() const;
