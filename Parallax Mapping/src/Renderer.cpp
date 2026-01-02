@@ -115,10 +115,10 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
         models.push_back(std::make_unique<Model>(path));
     }
     
-    pointLights.push_back(Light(glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(0.0f, 0.5f, 1.5f), LightType::Point));
-    pointLights.push_back(Light(glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(-4.0f, 0.5f, -3.0f), LightType::Point));
-    pointLights.push_back(Light(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(3.0f, 0.5f, 1.0f), LightType::Point));
-    pointLights.push_back(Light(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(-0.8f, 2.4f, -1.0f), LightType::Point));
+    pointLights.push_back(Light(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.5f, 1.5f), LightType::Point));
+    pointLights.push_back(Light(glm::vec3(4.0f, 0.0f, 0.0f), glm::vec3(-4.0f, 0.5f, -3.0f), LightType::Point));
+    pointLights.push_back(Light(glm::vec3(0.0f, 0.0f, 6.0f), glm::vec3(3.0f, 0.5f, 1.0f), LightType::Point));
+    pointLights.push_back(Light(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(-0.8f, 2.4f, -1.0f), LightType::Point));
 
     transform.setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
     transform.setScale(glm::vec3(1.0f));
@@ -479,9 +479,9 @@ void Renderer::onImGuiRender()
     ImGui::SameLine();
     ImGui::Checkbox("useNormal", &hasNormal);
     
-    ImGui::SliderFloat("height_scale", &height_scale, 0.0005f, 0.01f);
+    /*ImGui::SliderFloat("height_scale", &height_scale, 0.0005f, 0.01f);
     ImGui::SameLine();
-    ImGui::Checkbox("useHeight", &hasHeight);
+    ImGui::Checkbox("useHeight", &hasHeight);*/
     
     ImGui::SliderFloat("Exposure", &exposure, 0.01f, 10.0f);
     ImGui::SameLine();

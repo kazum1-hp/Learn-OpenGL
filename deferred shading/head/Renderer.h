@@ -58,9 +58,11 @@ private:
 	bool hasHeight = false;
 	float height_scale = 0.001f;
 	float samplerDistance = 1.0f;
-	bool useHdr = false;
+	bool useHdr = true;
 	bool useBloom = false;
 	float exposure = 1.0f;
+
+	bool useDeferred = false;
 
 public:
 	Renderer(Camera& cam, InputManager& input, Window& win, const std::vector<std::string>& modelPaths);
@@ -70,5 +72,12 @@ public:
 	void drawModel(const Model& model, Shader& shader) const;
 	void resizeFrameBuffer();
 	void onImGuiRender();
+
+	void forwardPass();
+	void deferredpass();
+	void shadowPass();
+	void geometryPass();
+	void lightPass();
+	void postProcessPass(const FrameBuffer& framebuffer);
 };
 

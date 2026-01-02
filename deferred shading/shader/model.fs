@@ -1,6 +1,6 @@
 #version 330 core
 layout (location = 0) out vec4 FragColor;
-//layout (location = 1) out vec4 BrightColor;
+layout (location = 1) out vec4 BrightColor;
 
 in VS_OUT{
 	vec2 TexCoords;
@@ -141,8 +141,8 @@ void main()
 
 	vec3 textureColor = pointColor + parallelColor;
 
-	//FragColor = vec4(textureColor, alpha);
-	
+    BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+
     FragColor = vec4(textureColor, 1.0);
 }
 
