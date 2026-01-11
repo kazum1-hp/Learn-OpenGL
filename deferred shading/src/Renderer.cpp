@@ -181,7 +181,7 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
     shader.setUniform("material.shininess", material.getShininess());
     for (int i = 0; i < pointLights.size(); i++)
     {
-        auto& light = pointLights[i];
+        //auto& light = pointLights[i];
         std::string base = "pointLight[" + std::to_string(i) + "]";
 
         shader.setUniform(base + ".constant", 1.0f);
@@ -204,7 +204,7 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, const std::vec
     lightPassShader.setUniform("material.shininess", material.getShininess());
     for (int i = 0; i < pointLights.size(); i++)
     {
-        auto& light = pointLights[i];
+        //auto& light = pointLights[i];
         std::string base = "pointLight[" + std::to_string(i) + "]";
 
         lightPassShader.setUniform(base + ".constant", 1.0f);
@@ -870,7 +870,7 @@ void Renderer::drawMesh(const Mesh& mesh, Shader& shader) const
                 uniformName = "height";
                 break;
         }
-
+        //std::cout << "Binding Uniform: " << uniformName << " to Slot: " << slot << std::endl;
         shader.setUniform(uniformName, static_cast<int>(slot));
         slot++;
     }

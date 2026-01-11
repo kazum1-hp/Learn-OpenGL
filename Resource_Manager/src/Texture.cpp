@@ -85,7 +85,6 @@ void Texture::bind(GLuint slot) const
 {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, ID);
-	//std::cout << "ID: " << ID << " Bind slot: " << slot << std::endl;
 }
 
 Texture::~Texture()
