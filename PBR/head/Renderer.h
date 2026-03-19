@@ -76,6 +76,8 @@ private:
 	bool hasNormal = false;
 	bool hasHeight = false;
 	float height_scale = 0.001f;
+	bool hasARMMap = false;
+
 	float samplerDistance = 1.0f;
 	bool useHdr = true;
 	bool useBloom = false;

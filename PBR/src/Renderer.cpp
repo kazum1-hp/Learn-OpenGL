@@ -39,6 +39,7 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_CULL_FACE);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
 void Renderer::init()
@@ -80,7 +81,6 @@ void Renderer::init()
     }
 
     modelShader->use();
-    modelShader->setUniform("material.shininess", res.GetMaterial("material")->getShininess());
     for (int i = 0; i < scene.GetPointLights().size(); i++)
     {
         std::string base = "pointLight[" + std::to_string(i) + "]";
@@ -110,10 +110,6 @@ void Renderer::init()
         lightPassShader->setUniform(base + ".linear", 0.09f);
         lightPassShader->setUniform(base + ".quadratic", 0.032f);
     }
-
-    pbrShader->use();
-    pbrShader->setUniform("albedo", glm::vec3(0.5f, 0.0f, 0.0f));
-    pbrShader->setUniform("ao", 1.0f);
 }
 
 void Renderer::render(const Scene& scene)
@@ -123,20 +119,16 @@ void Renderer::render(const Scene& scene)
     FrameBuffer& hdrFrameBuffer = *framebuffers[0];
     FrameBuffer& lightPassFrameBuffer = *framebuffers[3];
 
-    if (!usePbr)
+    if (!useDeferred)
     {
-        if (!useDeferred)
-        {
-            forwardPass(scene);
-            postProcessPass(hdrFrameBuffer);
-        }
-        else
-        {
-            deferredPass(scene);
-            postProcessPass(lightPassFrameBuffer);
-        }
+        forwardPass(scene);
+        postProcessPass(hdrFrameBuffer);
     }
-    else pbrPass(scene);
+    else
+    {
+        deferredPass(scene);
+        postProcessPass(lightPassFrameBuffer);
+    }
 }
 
 void Renderer::shadowPass(const Scene& scene)
@@ -274,14 +266,16 @@ void Renderer::forwardPass(const Scene& scene)
     modelShader->setUniform("model", model);
     modelShader->setUniform("hasNormalMap", false);
     modelShader->setUniform("hasHeightMap", false);
+    modelShader->setUniform("hasARMMap", false);
     glDisable(GL_CULL_FACE);
-    //plane->draw();
+    plane->draw();
     glEnable(GL_CULL_FACE);
     for (const auto& obj : scene.GetObjects()) {
         drawModel(*obj.model, *modelShader);
         modelShader->setUniform("hasNormalMap", hasNormal);
         modelShader->setUniform("hasHeightMap", hasHeight);
         modelShader->setUniform("height_scale", height_scale);
+        modelShader->setUniform("hasARMMap", true);
         renderModel(obj.transform, *obj.model, *modelShader);
     }
 
@@ -390,7 +384,7 @@ void Renderer::geometryPass(const Scene& scene)
         gBufferShader->setUniform("hasNormalMap", hasNormal);
         gBufferShader->setUniform("hasHeightMap", hasHeight);
         gBufferShader->setUniform("height_scale", height_scale);
-        renderModel(obj.transform, *obj.model, *modelShader);
+        renderModel(obj.transform, *obj.model, *gBufferShader);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -514,7 +508,7 @@ void Renderer::lightPass(const Scene& scene)
     glDisable(GL_DEPTH_TEST);
 
     int debugH = window.getHeight() / 4;
-    int debugW = debugH * camera.aspect;
+    int debugW = debugH * static_cast<int>(camera.aspect);
 
     //Shader& debugShader = *shaders[10];
     gbufferDebugShader->use();
@@ -635,7 +629,6 @@ void Renderer::onImGuiRender()
         scene.GetPointLights()[i].pointOnImGuiRender(i);
     }
 
-
     //ImGui::Combo("Effect Mode", &effectMode, "normal\0inversion\0grayscale\0sharpen\0blur\0\0");
     //if (effectMode == 3 || effectMode == 4)
     //{
@@ -646,12 +639,7 @@ void Renderer::onImGuiRender()
     input.onImGuiRender();
 
     //ImGui::SameLine();
-    ImGui::Checkbox("useBinnPhong", &useBlinnPhong);
-    ImGui::SameLine();
-    ImGui::Checkbox("useQuadratic", &useQuadratic);
-    ImGui::SameLine();
-    ImGui::Checkbox("useGamma", &useGamma);
-    ImGui::SameLine();
+    
     ImGui::Checkbox("useNormal", &hasNormal);
     
     /*ImGui::SliderFloat("height_scale", &height_scale, 0.0005f, 0.01f);

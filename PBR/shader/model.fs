@@ -61,6 +61,7 @@ uniform sampler2D arm;
 uniform bool hasNormalMap;
 uniform bool hasHeightMap;
 uniform float height_scale;
+uniform bool hasARMMap;
 
 uniform vec3 viewPos;
 uniform bool useBlinnPhong;
@@ -85,7 +86,7 @@ vec3 CalParallelLight(ParallelLight parallelLight, vec3 norm, vec3 viewDir, vec3
 vec3 CalPointLight(PointLight pointLight, vec3 norm, vec3 viewDir, vec3 pointLightDir, vec3 texColor, float pointShadow, float ao, float roughness, float metallic);
 
 float ShadowCalculation(vec4 FragPosLightSpace, vec3 n);
-float PointShadowCalculation(vec3 fragPos, PointLight pointLight, samplerCube shadowMap);
+float PointShadowCalculation(vec3 fragPos, vec3 normal, PointLight pointLight, samplerCube shadowMap);
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
 
@@ -162,11 +163,19 @@ void main()
 	}
 	
 	vec4 texColor = texture(diffuse, texCoords);
-	vec3 arm = texture(arm, texCoords).rgb;
+    float ao, roughness, metallic;
+    if (hasARMMap)
+	{
+        vec3 arm = texture(arm, texCoords).rgb;
 
-	float ao        = arm.r;
-	float roughness = arm.g;
-	float metallic  = arm.b;  
+	    ao        = arm.r;
+	    roughness = arm.g;
+	    metallic  = arm.b;
+    }
+    else 
+        ao = 1.0;
+        roughness = 0.5;
+        metallic = 0.0;
 
 	vec3 pointColor = vec3(0.0);
 
@@ -174,7 +183,7 @@ void main()
 	{
 		vec3 pointLightDir = normalize(pointLight[i].position - fs_in.FragPos);
 
-		float pointShadow = pointShadows ? PointShadowCalculation(fs_in.FragPos, pointLight[i], shadowMap[i]) : 0.0;
+		float pointShadow = pointShadows ? PointShadowCalculation(fs_in.FragPos, N, pointLight[i], shadowMap[i]) : 0.0;
 
 		pointColor += CalPointLight(pointLight[i], norm, viewDir, pointLightDir, texColor.rgb, pointShadow, ao, roughness, metallic) * modelLight;
 	}
@@ -301,29 +310,31 @@ vec3 CalPointLight(PointLight pointLight, vec3 norm, vec3 viewDir, vec3 pointLig
     return pointLightColor;
 }
 
-float PointShadowCalculation(vec3 fragPos, PointLight pointLight, samplerCube shadowMap)
+float PointShadowCalculation(vec3 fragPos, vec3 normal, PointLight pointLight, samplerCube shadowMap)
 {
-	vec3 fragToLight = fragPos - pointLight.position;
+    vec3 fragToLight = fragPos - pointLight.position;
+    float currentDepth = length(fragToLight);
 
-	float currentDepth = length(fragToLight);
-
-	float shadow = 0.0;
-    float bias = 0.15;
+    float shadow = 0.0;
     int samples = 20;
-    float viewDistance = length(viewPos - fragPos);
-    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
+
+    vec3 lightDir = normalize(pointLight.position - fragPos);
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+
+    float diskRadius = clamp(0.02 * currentDepth / far_plane, 0.001, 0.02);
+
     for(int i = 0; i < samples; ++i)
     {
-        float closestDepth = texture(shadowMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-        closestDepth *= far_plane;   // undo mapping [0;1]
-        if(currentDepth - bias > closestDepth)
+        vec3 sampleDir = normalize(fragToLight + normalize(gridSamplingDisk[i]) * diskRadius);
+
+        float closestDepth = texture(shadowMap, sampleDir).r;
+        closestDepth *= far_plane;
+
+        if(currentDepth > closestDepth + bias)
             shadow += 1.0;
     }
+
     shadow /= float(samples);
-        
-    // display closestDepth as debug (to visualize depth cubemap)
-    // FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
-        
     return shadow;
 }
 

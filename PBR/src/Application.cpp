@@ -51,7 +51,7 @@ void Application::init()
 	auto model = res.LoadModel("../Assets/blue_metal_plate_4k.gltf/blue_metal_plate_4k.gltf");
 	auto material = res.LoadMaterial("material");
 
-	mainScene.AddObject(model, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f), material);
+	mainScene.AddObject(model, glm::vec3(0.0f, -0.5f, 0.0f), glm::vec3(0.3f), material);
 	mainScene.AddPointLight(Light(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.5f, 1.5f), LightType::Point));
 	mainScene.AddPointLight(Light(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(-4.0f, 0.5f, -3.0f), LightType::Point));
 	mainScene.AddPointLight(Light(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(3.0f, 0.5f, 1.0f), LightType::Point));
