@@ -15,19 +15,20 @@
 #include <memory>
 
 class Scene;
+struct Environment;
 class ResourceManager;
 
 class Renderer
 {
 private:
-	// --- 外部引用 ---
+	// --- External reference ---
 	Window& window;
 	Camera& camera;
 	InputManager& input;
 	Scene& scene;
 
-	// --- 管线资源 (Renderer 拥有的基础设施) ---
-	// 渲染器需要持有它用来完成渲染工作的 Shader，但数据从 ResourceManager 获取
+	// --- Pipeline Resource ---
+	// The renderer needs to hold the shaders it uses to perform rendering tasks, but the data is obtained from the ResourceManager.
 	std::shared_ptr<Shader> modelShader;
 	std::shared_ptr<Shader> lightShader;
 	std::shared_ptr<Shader> sceneFramebufferShader;
@@ -55,10 +56,10 @@ private:
 
 	glm::mat4 LightSpaceMatrix;
 
-	unsigned int envCubemap = 0;
-	unsigned int irradianceMap = 0;
-	unsigned int prefilterMap = 0;
-	unsigned int brdfLUTTexture = 0;
+	//unsigned int envCubemap = 0;
+	//unsigned int irradianceMap = 0;
+	//unsigned int prefilterMap = 0;
+	//unsigned int brdfLUTTexture = 0;
 
 	int effectMode = 0;
 	float skyboxLight = 1.0f;
@@ -78,10 +79,11 @@ private:
 	bool useGamma = true;
 
 	const unsigned int SHADOW_Size = 1024;
-	const unsigned int resolution = 4096;
+	const unsigned int resolution = 1024;
 
 	bool parallelShadows = true;
 	bool pointShadows = true;
+	bool useShadows = false;
 
 	bool hasNormal = false;
 	bool hasHeight = false;
@@ -93,31 +95,33 @@ private:
 	bool useBloom = false;
 	float exposure = 1.0f;
 
-	float aoScale = 1.0f;
-	float roughnessScale = 1.0f;
-	float metallicScale = 1.0f;
 	float aoBias = 0.0f;
 	float roughnessBias = 0.0f;
 	float metallicBias = 0.0f;
 
 	bool useDeferred = false;
-	//bool usePbr = false;
+	bool usePostProcess = false;
+	bool drawLights = false;
+	bool drawPlane = false;
+
+	void prepareEnvironment(Environment& env);
+	void generateIBLMaps(Environment& env);
 
 public:
 	Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene);
 	void init();
-	void render(const Scene& scene);
+	void render(Scene& scene);
 	void renderModel(const Transform& transform, const Model& model, Shader& shader);
 	void drawMesh(const Mesh& mesh, Shader& shader) const;
 	void drawModel(const Model& model, Shader& shader) const;
 	void resizeFrameBuffer();
 	void onImGuiRender();
 
-	void forwardPass(const Scene& scene);
-	void deferredPass(const Scene& scene);
-	void shadowPass(const Scene& scene);
-	void geometryPass(const Scene& scene);
-	void lightPass(const Scene& scene);
+	void forwardPass(Scene& scene);
+	void deferredPass(Scene& scene);
+	void shadowPass(Scene& scene);
+	void geometryPass(Scene& scene);
+	void lightPass(Scene& scene);
 	void postProcessPass(const FrameBuffer& framebuffer);
 };
 

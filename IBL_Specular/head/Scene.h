@@ -7,28 +7,47 @@
 #include "Transform.h"
 #include "Material.h"
 
-// 为了能在场景中放置模型，我们需要一个结构体来保存 模型指针 + 位置信息
+// In order to place the model in the scene, we need a struct to store the model pointer and position information.
 struct RenderObject {
     std::shared_ptr<Model> model;
     Transform transform;
-    // 如果需要覆盖模型默认材质，可以在这里加 Material
+    // If need to override the model's default material, add the Material here.
     std::shared_ptr<Material> material;
 };
 
-struct EnvironmentData {
-    GLuint hdrTexture;        // 原始 HDR 纹理
-    GLuint envCubemap;       // 转换后的立方体环境贴图
-    GLuint irradianceMap;    // 漫反射卷积图
-    GLuint prefilterMap;     // 镜面反射预过滤图
-    GLuint brdfLUT;          // BRDF 查找表
+struct EnvironmentAsset {
+    GLuint hdrTexture;
 };
+
+struct EnvironmentMaps {
+    GLuint envCubemap = 0;
+    GLuint irradianceMap = 0;
+    GLuint prefilterMap = 0;
+    GLuint brdfLUT = 0;
+
+    bool isGenerated = false;
+    GLuint lastHDR = 0; // 防止重复生成
+};
+
+struct Environment {
+    std::shared_ptr<EnvironmentAsset> asset;
+    EnvironmentMaps maps;
+};
+
+//struct EnvironmentData {
+//    GLuint hdrTexture;        // origin HDR texture
+//    GLuint envCubemap;       // Converted cube environment map
+//    GLuint irradianceMap;    // irradianceMap
+//    GLuint prefilterMap;     // prefilterMap
+//    GLuint brdfLUT;          // BRDF Lookup table
+//};
 
 class Scene {
 public:
-    // 默认初始化一个方向光
+    // A default directional light
     Scene() :dirLight(glm::vec3(1.0f), 1.0f, glm::vec3(-2.2f, -2.0f, -2.3f), LightType::Directional) {}
 
-    // --- 添加物体 ---
+    // --- Add Objects ---
     void AddObject(std::shared_ptr<Model> model, glm::vec3 pos = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f), std::shared_ptr<Material> mat = nullptr) {
         RenderObject obj;
         obj.model = model;
@@ -38,9 +57,14 @@ public:
         objects.push_back(obj);
     }
 
-    // --- 灯光管理 ---
+    // --- Lighting Management ---
     void AddPointLight(const Light& light) {
         pointLights.push_back(light);
+    }
+
+    void SetEnvironment(std::shared_ptr<EnvironmentAsset> envAsset) {
+        environment.asset = envAsset;
+        environment.maps.isGenerated = false; // 标记需要重新生成
     }
 
     // --- Getters ---
@@ -53,13 +77,15 @@ public:
 
     //void SetSkybox(std::shared_ptr<Skybox> sb) { skybox = sb; }
     //const Skybox* GetSkybox() const { return skybox.get(); }
-    void SetSkybox(GLuint hdrTexID) { env.hdrTexture = hdrTexID; }
-    const GLuint GetSkybox() const { return env.hdrTexture; }
+    
+    Environment& GetEnvironment() { return environment; }
+    const Environment& GetEnvironment() const { return environment; }
+    //const GLuint GetSkybox() const { return env.hdrTexture; }
 
 private:
     std::vector<RenderObject> objects;
     std::vector<Light> pointLights;
     Light dirLight;
     std::shared_ptr<Skybox> skybox;
-    EnvironmentData env;
+    Environment environment;
 };

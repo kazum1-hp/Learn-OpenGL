@@ -11,7 +11,6 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "GLFW/glfw3.h"
 
-// 假设你有这些类
 #include "Shader.h"
 #include "Texture.h"
 #include "Model.h"
@@ -25,7 +24,7 @@ public:
         return instance;
     }
 
-    // 禁止拷贝
+    // Copying is prohibited.
     ResourceManager(const ResourceManager&) = delete;
     ResourceManager& operator=(const ResourceManager&) = delete;
 
@@ -76,8 +75,8 @@ public:
         return nullptr;
     }
 
-    // --- 基础形状 (Quad, Cube) 供渲染器内部使用 ---
-    // 这里建议实现一个生成全屏Quad的方法，因为Renderer做后处理需要用到
+    // --- Basic shapes (Quad, Cube) are used internally by the renderer. ---
+    // It is recommended to implement a method to generate a full-screen Quad, because the Renderer needs it for post-processing.
     std::shared_ptr<Mesh> GetScreenQuad() {
         if (screenQuad) return screenQuad;
 
@@ -198,7 +197,7 @@ public:
     }
 
     static std::array<glm::mat4, 6> calculateCubeMatrices(glm::vec3 center, float nearZ = 0.1f, float farZ = 100.0f) {
-        // IBL 和 Shadow 的 aspect 永远是 1.0f
+        // The aspect of IBL and Shadow is always 1.0f.
         glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1.0f, nearZ, farZ);
 
         return {
@@ -219,7 +218,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Model>> models;
     std::unordered_map<std::string, std::shared_ptr<Material>> materials;
 
-    std::shared_ptr<Mesh> screenQuad; // 缓存一个常用的Quad
+    std::shared_ptr<Mesh> screenQuad; // Cache a frequently used Quad
     std::shared_ptr<Mesh> plane;
     std::shared_ptr<Mesh> cube;
 };

@@ -39,7 +39,7 @@ public:
             // Position
             if (ImGui::DragFloat3("Position", &position[0], 0.1f))
             {
-                // 你也可以在这里加 dirty flag
+                //  dirty flag
             }
 
             // Rotation (in degrees for UI)
@@ -52,7 +52,7 @@ public:
             // Scale
             if (ImGui::DragFloat3("Scale", &scale[0], 0.05f))
             {
-                // 确保 scale 不为 0
+                // ensure scale not equal 0
                 if (scale.x == 0) scale.x = 0.001f;
                 if (scale.y == 0) scale.y = 0.001f;
                 if (scale.z == 0) scale.z = 0.001f;

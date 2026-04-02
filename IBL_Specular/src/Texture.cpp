@@ -63,12 +63,10 @@ Texture::Texture(const std::string& path, TextureType typeName)
 
 	// load from memory
 	if (typeName == HDR) {
-		// HDR 必须使用 loadf，返回 float*
 		stbi_set_flip_vertically_on_load(true);
 		data = stbi_loadf_from_memory(buffer.data(), (int)size, &width, &height, &nrChannels, 0);
 	}
 	else {
-		// 普通贴图使用 load，返回 unsigned char*
 		data = stbi_load_from_memory(buffer.data(), (int)size, &width, &height, &nrChannels, 0);
 	}
 

@@ -75,16 +75,17 @@ void main()
         }
 
         vec3 result;
-        vec3 bloomColor = texture(blur, TexCoords).rgb;
+        vec3 bloomColor = vec3(0.0);
 
         if (useHdr)
         {
             if (useBloom)
+                bloomColor = texture(blur, TexCoords).rgb;
                 color += bloomColor;
             // reinhard
-            result = color / (color + vec3(1.0));
+            // result = color / (color + vec3(1.0));
             // exposure
-            //result = vec3(1.0) - exp(-color * exposure);
+            result = vec3(1.0) - exp(-color * exposure);
         }
         else
             result = color;
@@ -96,5 +97,8 @@ void main()
     }
         
     else
-        FragColor = vec4(texture(screenTexture, TexCoords).rgb, 1.0);
+        {
+            color = vec3(texture(screenTexture, TexCoords).rgb);
+            FragColor = vec4(pow(color, vec3(1.0 / gamma)), 1.0);
+        }
 }

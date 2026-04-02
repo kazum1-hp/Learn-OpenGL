@@ -6,15 +6,6 @@
 #include "../head/ResourceManager.h"
 #include "../head/Scene.h"
 
-const std::vector<std::string> faces = {
-    ("../Assets/genshin1/px.png"),
-    ("../Assets/genshin1/nx.png"),
-    ("../Assets/genshin1/py.png"),
-    ("../Assets/genshin1/ny.png"),
-    ("../Assets/genshin1/pz.png"),
-    ("../Assets/genshin1/nz.png")
-};
-
 Renderer::Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene)
     :camera(cam),
      input(input),
@@ -46,11 +37,11 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene)
 
 void Renderer::init()
 {
-    // 1. 获取 ResourceManager 实例
+    // 1. Get ResourceManager instance
     auto& res = ResourceManager::GetInstance();
 
-    // 2. 加载管线核心 Shader (这些是渲染器工作必须的)
-    // 假设这些 Shader 已经由外部或 GameInit 预加载进管理器，或者在这里首次加载
+    // 2. Load pipeline core Shader
+    // Assuming these shaders have already been preloaded into the manager by external or GameInit, or are being loaded for the first time here.
     modelShader = res.GetShader("model");
     lightShader = res.GetShader("light");
     sceneFramebufferShader = res.GetShader("scene framebuffer");
@@ -67,7 +58,7 @@ void Renderer::init()
     prefilterShader = res.GetShader("prefilter");
     brdfShader = res.GetShader("brdf");
 
-    // 获取全屏 Quad (假设 ResourceManager 里已经实现了生成逻辑)
+    // Get fullscreen Quad 
     screenQuad = res.GetScreenQuad();
     plane = res.GetPlane();
     cube = res.GetCube();
@@ -103,9 +94,47 @@ void Renderer::init()
     bloomBlurShader->setUniform("image", 0);
 
     backgroundShader->use();
-    backgroundShader->setUniform("environmentMap", 0);
+    backgroundShader->setUniform("environmentMap", 0);  
 
-    // hdr texture -> cube map
+    // defered rendering lightPass
+    lightPassShader->use();
+    lightPassShader->setUniform("gPosition", 0);
+    lightPassShader->setUniform("gNormal", 1);
+    lightPassShader->setUniform("gAlbedoSpec", 2);
+    lightPassShader->setUniform("gGeoNormal", 3);
+    lightPassShader->setUniform("gDepth", 4);
+
+    lightPassShader->setUniform("material.shininess", res.GetMaterial("material")->getShininess());
+    for (int i = 0; i < scene.GetPointLights().size(); i++)
+    {
+        std::string base = "pointLight[" + std::to_string(i) + "]";
+
+        lightPassShader->setUniform(base + ".constant", 1.0f);
+        lightPassShader->setUniform(base + ".linear", 0.09f);
+        lightPassShader->setUniform(base + ".quadratic", 0.032f);
+    }
+}
+
+void Renderer::prepareEnvironment(Environment& env)
+{
+    if (!env.asset) return;
+
+    if (env.maps.isGenerated &&
+        env.maps.lastHDR == env.asset->hdrTexture)
+        return;
+
+    generateIBLMaps(env);
+
+    env.maps.lastHDR = env.asset->hdrTexture;
+    env.maps.isGenerated = true;
+}
+
+void Renderer::generateIBLMaps(Environment& env)
+{
+    auto& res = ResourceManager::GetInstance();
+
+    GLuint envMap = env.asset->hdrTexture;
+
     unsigned int captureFBO;
     unsigned int captureRBO;
     glGenFramebuffers(1, &captureFBO);
@@ -116,10 +145,8 @@ void Renderer::init()
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution, resolution);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
-    GLuint envMap = scene.GetSkybox();
-    
-    glGenTextures(1, &envCubemap);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+    glGenTextures(1, &env.maps.envCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.envCubemap);
     for (unsigned int i = 0; i < 6; ++i)
     {
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution, resolution, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -143,7 +170,7 @@ void Renderer::init()
     for (unsigned int i = 0; i < 6; ++i)
     {
         skyboxShader->setUniform("projView", projViewMatrix[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, env.maps.envCubemap, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cube->draw();
@@ -152,8 +179,8 @@ void Renderer::init()
 
     // pbr: create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
     // --------------------------------------------------------------------------------
-    glGenTextures(1, &irradianceMap);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+    glGenTextures(1, &env.maps.irradianceMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.irradianceMap);
     for (unsigned int i = 0; i < 6; ++i)
     {
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -173,14 +200,14 @@ void Renderer::init()
     irradianceShader->use();
     irradianceShader->setUniform("environmentMap", 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.envCubemap);
 
     glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
     for (unsigned int i = 0; i < 6; ++i)
     {
         irradianceShader->setUniform("projView", projViewMatrix[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, env.maps.irradianceMap, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cube->draw();
@@ -189,8 +216,8 @@ void Renderer::init()
 
     // pbr: create a pre-filter cubemap, and re-scale capture FBO to pre-filter scale.
     // --------------------------------------------------------------------------------
-    glGenTextures(1, &prefilterMap);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+    glGenTextures(1, &env.maps.prefilterMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.prefilterMap);
     for (unsigned int i = 0; i < 6; ++i)
     {
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -208,7 +235,7 @@ void Renderer::init()
     prefilterShader->use();
     prefilterShader->setUniform("environmentMap", 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.envCubemap);
 
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
     unsigned int maxMipLevels = 5;
@@ -226,7 +253,7 @@ void Renderer::init()
         for (unsigned int i = 0; i < 6; ++i)
         {
             prefilterShader->setUniform("projView", projViewMatrix[i]);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterMap, mip);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, env.maps.prefilterMap, mip);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             cube->draw();
@@ -236,10 +263,10 @@ void Renderer::init()
 
     // pbr: generate a 2D LUT from the BRDF equations used.
     // ----------------------------------------------------
-    glGenTextures(1, &brdfLUTTexture);
+    glGenTextures(1, &env.maps.brdfLUT);
 
     // pre-allocate enough memory for the LUT texture.
-    glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+    glBindTexture(GL_TEXTURE_2D, env.maps.brdfLUT);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
     // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -251,7 +278,7 @@ void Renderer::init()
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, env.maps.brdfLUT, 0);
 
     glViewport(0, 0, 512, 512);
     brdfShader->use();
@@ -261,37 +288,35 @@ void Renderer::init()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glViewport(0, 0, window.getWidth(), window.getHeight());
-
-    // defered rendering lightPass
-    lightPassShader->use();
-    lightPassShader->setUniform("gPosition", 0);
-    lightPassShader->setUniform("gNormal", 1);
-    lightPassShader->setUniform("gAlbedoSpec", 2);
-    lightPassShader->setUniform("gGeoNormal", 3);
-    lightPassShader->setUniform("gDepth", 4);
-
-    lightPassShader->setUniform("material.shininess", res.GetMaterial("material")->getShininess());
-    for (int i = 0; i < scene.GetPointLights().size(); i++)
-    {
-        std::string base = "pointLight[" + std::to_string(i) + "]";
-
-        lightPassShader->setUniform(base + ".constant", 1.0f);
-        lightPassShader->setUniform(base + ".linear", 0.09f);
-        lightPassShader->setUniform(base + ".quadratic", 0.032f);
-    }
 }
 
-void Renderer::render(const Scene& scene)
+void Renderer::render(Scene& scene)
 {
-    shadowPass(scene);
+    prepareEnvironment(scene.GetEnvironment());
+
+    if (useShadows)
+        shadowPass(scene);
+    else
+    {
+        parallelShadows = false;
+        pointShadows = false;
+    }
 
     FrameBuffer& hdrFrameBuffer = *framebuffers[0];
     FrameBuffer& lightPassFrameBuffer = *framebuffers[3];
 
     if (!useDeferred)
-    {
-        forwardPass(scene);
-        //postProcessPass(hdrFrameBuffer);
+    {        
+        if (usePostProcess)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer.getFBO());
+            forwardPass(scene);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            postProcessPass(hdrFrameBuffer);
+        }
+
+        else
+            forwardPass(scene);
     }
     else
     {
@@ -300,7 +325,7 @@ void Renderer::render(const Scene& scene)
     }
 }
 
-void Renderer::shadowPass(const Scene& scene)
+void Renderer::shadowPass(Scene& scene)
 {
     //glm::mat4 LightSpaceMatrix = dirLight.getOrthoMatrix() * dirLight.getOrthoViewMatrix();
     glm::mat4 model(1.0f);
@@ -318,9 +343,9 @@ void Renderer::shadowPass(const Scene& scene)
 
         dirShadowShader->setUniform("lightSpaceMatrix", LightSpaceMatrix);
         dirShadowShader->setUniform("model", model);
-        /*glDisable(GL_CULL_FACE);
+        glDisable(GL_CULL_FACE);
         plane->draw();
-        glEnable(GL_CULL_FACE);*/
+        glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
         for (const auto& obj : scene.GetObjects()) {
             renderModel(obj.transform, *obj.model, *dirShadowShader);
@@ -348,9 +373,9 @@ void Renderer::shadowPass(const Scene& scene)
             pointShadowShader->setUniform("lightPos", scene.GetPointLights()[i].getLightPos());
 
             pointShadowShader->setUniform("model", model);
-            /*glDisable(GL_CULL_FACE);
+            glDisable(GL_CULL_FACE);
             plane->draw();
-            glEnable(GL_CULL_FACE);*/
+            glEnable(GL_CULL_FACE);
             glCullFace(GL_FRONT);
             for (const auto& obj : scene.GetObjects()) {
                 renderModel(obj.transform, *obj.model, *pointShadowShader);
@@ -364,23 +389,21 @@ void Renderer::shadowPass(const Scene& scene)
     glViewport(0, 0, window.getWidth(), window.getHeight());
 }
 
-void Renderer::forwardPass(const Scene& scene)
+void Renderer::forwardPass(Scene& scene)
 {
     glm::mat4 model(1.0f);
 
-    FrameBuffer& hdrFrameBuffer = *framebuffers[0];
     FrameBuffer& parallelShadowFrameBuffer = *framebuffers[1];
 
-    //glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer.getFBO());
+    auto& env = scene.GetEnvironment();
+
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // object
     modelShader->use();
 
-    modelShader->setUniform("aoScale", aoScale);
-    modelShader->setUniform("roughnessScale", roughnessScale);
-    modelShader->setUniform("metallicScale", metallicScale);
+    modelShader->setUniform("usePost", usePostProcess);
 
     modelShader->setUniform("aoBias", aoBias);
     modelShader->setUniform("roughnessBias", roughnessBias);
@@ -403,20 +426,23 @@ void Renderer::forwardPass(const Scene& scene)
     modelShader->setUniform("parallelLight.enabled", input.isParallelLightOn());
     modelShader->setUniform("lightSpaceMatrix", LightSpaceMatrix);
     modelShader->setUniform("parallelShadows", parallelShadows);
+    modelShader->setUniform("pointShadows", pointShadows);
 
-    if (input.isParallelLightOn())
+    if (useShadows)
     {
-        pointShadows = false;
+        if (input.isParallelLightOn())
+        {
+            pointShadows = false;
+            parallelShadows = true;
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, parallelShadowFrameBuffer.getDepth2D());
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, parallelShadowFrameBuffer.getDepth2D());
-
-        modelShader->setUniform("depthMap", 0);
+            modelShader->setUniform("depthMap", 0);
+        }
+        else pointShadows = true;
     }
-    else pointShadows = true;
 
     //point light
-    modelShader->setUniform("pointShadows", pointShadows);
 
     for (int i = 0; i < scene.GetPointLights().size(); i++)
     {
@@ -428,7 +454,7 @@ void Renderer::forwardPass(const Scene& scene)
         modelShader->setUniform(base + ".enabled", scene.GetPointLights()[i].lightOn() && input.isPointLightOn());
         modelShader->setUniform("far_plane", scene.GetPointLights()[i].getFar());
 
-        if (input.isPointLightOn())
+        if (input.isPointLightOn() && useShadows)
         {
             glActiveTexture(GL_TEXTURE1 + i);
             glBindTexture(GL_TEXTURE_CUBE_MAP, pointShadowFramebuffers[i]->getDepthCube());
@@ -437,21 +463,24 @@ void Renderer::forwardPass(const Scene& scene)
         }
     }
 
-    /*drawMesh(*plane, *modelShader);
-    modelShader->setUniform("model", model);
-    modelShader->setUniform("hasNormalMap", false);
-    modelShader->setUniform("hasHeightMap", false);
-    modelShader->setUniform("hasARMMap", false);
-    glDisable(GL_CULL_FACE);
-    plane->draw();
-    glEnable(GL_CULL_FACE);*/
+    if (drawPlane)
+    {
+        drawMesh(*plane, *modelShader);
+        modelShader->setUniform("model", model);
+        modelShader->setUniform("hasNormalMap", false);
+        modelShader->setUniform("hasHeightMap", false);
+        modelShader->setUniform("hasARMMap", false);
+        glDisable(GL_CULL_FACE);
+        plane->draw();
+        glEnable(GL_CULL_FACE);
+    }
 
     glActiveTexture(GL_TEXTURE9);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.irradianceMap);
     glActiveTexture(GL_TEXTURE10);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.prefilterMap);
     glActiveTexture(GL_TEXTURE11);
-    glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+    glBindTexture(GL_TEXTURE_2D, env.maps.brdfLUT);
 
     for (const auto& obj : scene.GetObjects()) {
         drawModel(*obj.model, *modelShader);
@@ -462,38 +491,41 @@ void Renderer::forwardPass(const Scene& scene)
         renderModel(obj.transform, *obj.model, *modelShader);
     }
 
-    //lightShader->use();
+    if (drawLights)
+    {
+        // draw cube lights
+        lightShader->use();
 
-    ////// transform matrix
-    //lightShader->setUniform("view", camera.getViewMatrix());
-    //lightShader->setUniform("projection", camera.getProjectionMatrix());
+        ////// transform matrix
+        lightShader->setUniform("view", camera.getViewMatrix());
+        lightShader->setUniform("projection", camera.getProjectionMatrix());
 
-    //for (int i = 0; i < scene.GetPointLights().size(); i++)
-    //{
-    //    glm::mat4 lightModel(1.0f);
-    //    lightModel = glm::translate(model, scene.GetPointLights()[i].getLightPos());
-    //    lightModel = glm::scale(lightModel, glm::vec3(0.25f));
-    //    lightShader->setUniform("model", lightModel);
-    //    lightShader->setUniform("lightColor", scene.GetPointLights()[i].getColor());
-    //    lightShader->setUniform("enabled", scene.GetPointLights()[i].lightOn() && input.isPointLightOn());
-    //    if (scene.GetPointLights()[i].lightOn() && input.isPointLightOn())
-    //    {
-    //        cube->draw();
-    //    }
-    //}
+        for (int i = 0; i < scene.GetPointLights().size(); i++)
+        {
+            glm::mat4 lightModel(1.0f);
+            lightModel = glm::translate(model, scene.GetPointLights()[i].getLightPos());
+            lightModel = glm::scale(lightModel, glm::vec3(0.25f));
+            lightShader->setUniform("model", lightModel);
+            lightShader->setUniform("lightColor", scene.GetPointLights()[i].getColor());
+            lightShader->setUniform("enabled", scene.GetPointLights()[i].lightOn() && input.isPointLightOn());
+            if (scene.GetPointLights()[i].lightOn() && input.isPointLightOn())
+            {
+                cube->draw();
+            }
+        }
+    }
 
-    glDisable(GL_CULL_FACE); // 或者 glCullFace(GL_FRONT)
+    glDisable(GL_CULL_FACE); // or glCullFace(GL_FRONT)
 
     backgroundShader->use();
     backgroundShader->setUniform("view", camera.getViewMatrix());
     backgroundShader->setUniform("projection", camera.getProjectionMatrix());
+    backgroundShader->setUniform("usePost", usePostProcess);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.envCubemap);
     cube->draw();
 
     glEnable(GL_CULL_FACE);
-
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::postProcessPass(const FrameBuffer& framebuffer)
@@ -506,22 +538,25 @@ void Renderer::postProcessPass(const FrameBuffer& framebuffer)
     bool horizontal = true, first_iteration = true;
     unsigned int amount = 5;
 
-    bloomBlurShader->use();
-    bloomBlurShader->setUniform("samplerDistance", samplerDistance);
+    if (useBloom)
+    {   
+        bloomBlurShader->use();
+        bloomBlurShader->setUniform("samplerDistance", samplerDistance);
 
-    for (unsigned int i = 0; i < amount; i++)
-    {
-        glBindFramebuffer(GL_FRAMEBUFFER, pingpongFrameBuffer[horizontal]->getFBO());
-        bloomBlurShader->setUniform("horizontal", horizontal);
+        for (unsigned int i = 0; i < amount; i++)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, pingpongFrameBuffer[horizontal]->getFBO());
+            bloomBlurShader->setUniform("horizontal", horizontal);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, first_iteration ? framebuffer.getColor(1) : pingpongFrameBuffer[!horizontal]->getColor());  // bind texture of other framebuffer (or scene if first iteration)
-        screenQuad->draw();
-        horizontal = !horizontal;
-        if (first_iteration)
-            first_iteration = false;
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, first_iteration ? framebuffer.getColor(1) : pingpongFrameBuffer[!horizontal]->getColor());  // bind texture of other framebuffer (or scene if first iteration)
+            screenQuad->draw();
+            horizontal = !horizontal;
+            if (first_iteration)
+                first_iteration = false;
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     sceneFramebufferShader->use();
 
@@ -536,8 +571,13 @@ void Renderer::postProcessPass(const FrameBuffer& framebuffer)
     sceneFramebufferShader->setUniform("exposure", exposure);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, framebuffer.getColor(0));
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, pingpongFrameBuffer[!horizontal]->getColor());
+
+    if (useBloom)
+    {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, pingpongFrameBuffer[!horizontal]->getColor());
+    }
+
     screenQuad->draw();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -545,13 +585,13 @@ void Renderer::postProcessPass(const FrameBuffer& framebuffer)
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::deferredPass(const Scene& scene)
+void Renderer::deferredPass(Scene& scene)
 {
     geometryPass(scene);
     lightPass(scene);
 }
 
-void Renderer::geometryPass(const Scene& scene)
+void Renderer::geometryPass(Scene& scene)
 {
     glm::mat4 model(1.0f);
 
@@ -567,13 +607,14 @@ void Renderer::geometryPass(const Scene& scene)
     gBufferShader->setUniform("projection", camera.getProjectionMatrix());
     gBufferShader->setUniform("viewPos", camera.getPosition());
 
-    drawMesh(*plane, *gBufferShader);
+    /*drawMesh(*plane, *gBufferShader);
     gBufferShader->setUniform("model", model);
     gBufferShader->setUniform("hasNormalMap", false);
     gBufferShader->setUniform("hasHeightMap", false);
     glDisable(GL_CULL_FACE);
     plane->draw();
-    glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);*/
+
     for (const auto& obj : scene.GetObjects()) {
         drawModel(*obj.model, *gBufferShader);
         gBufferShader->setUniform("hasNormalMap", hasNormal);
@@ -585,7 +626,7 @@ void Renderer::geometryPass(const Scene& scene)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Renderer::lightPass(const Scene& scene)
+void Renderer::lightPass(Scene& scene)
 {
     glm::mat4 model(1.0f);
 
@@ -700,6 +741,19 @@ void Renderer::lightPass(const Scene& scene)
         }
     }
 
+    glDisable(GL_CULL_FACE); // or glCullFace(GL_FRONT)
+    auto& env = scene.GetEnvironment();
+
+    backgroundShader->use();
+    backgroundShader->setUniform("view", camera.getViewMatrix());
+    backgroundShader->setUniform("projection", camera.getProjectionMatrix());
+    backgroundShader->setUniform("usePost", usePostProcess);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.envCubemap);
+    cube->draw();
+
+    glEnable(GL_CULL_FACE);
+
     glDisable(GL_DEPTH_TEST);
 
     int debugH = window.getHeight() / 4;
@@ -713,7 +767,7 @@ void Renderer::lightPass(const Scene& scene)
         {
             glViewport(
                 0,                  // x
-                window.getHeight() - (index + 1) * debugH,  // y（OpenGL 原点在左下）
+                window.getHeight() - (index + 1) * debugH,  // y（The OpenGL origin of the coordinate axis is in the lower left corner.）
                 debugW,
                 debugH
             );
@@ -733,7 +787,6 @@ void Renderer::lightPass(const Scene& scene)
     drawDebug(gAlbedoSpec, 2);
     drawDebug(gDepth, 3);
 
-    // 恢复 viewport！
     glViewport(0, 0, window.getWidth(), window.getHeight());
     glEnable(GL_DEPTH_TEST);
 
@@ -821,20 +874,17 @@ void Renderer::onImGuiRender()
 
     scene.GetDirLight().dirOnImGuiRender();
 
-    //ImGui::Combo("Effect Mode", &effectMode, "normal\0inversion\0grayscale\0sharpen\0blur\0\0");
-    //if (effectMode == 3 || effectMode == 4)
-    //{
-    //    ImGui::SliderFloat("Offset", &offset, 100.0f, 1000.0f);
-    //}
-    ImGui::SliderFloat("Model Light", &modelLight, 0.1f, 1.0f);
+    ImGui::Combo("Effect Mode", &effectMode, "normal\0inversion\0grayscale\0sharpen\0blur\0\0");
+    if (effectMode == 3 || effectMode == 4)
+    {
+        ImGui::SliderFloat("Offset", &offset, 100.0f, 1000.0f);
+    }
+    //ImGui::SliderFloat("Model Light", &modelLight, 0.1f, 1.0f);
 
-    ImGui::SliderFloat("ao", &aoScale, 0.0f, 10.0f);
-    ImGui::SliderFloat("roughness", &roughnessScale, 0.0f, 10.0f);
-    ImGui::SliderFloat("metallic", &metallicScale, 0.0f, 10.0f);
-    ImGui::SliderFloat("aoBias", &aoBias, 0.01f, 1.0f);
-    ImGui::SliderFloat("roughnessBias", &roughnessBias, 0.01f, 1.0f);
-    ImGui::SliderFloat("metallicBias", &metallicBias, 0.01f, 1.0f);
-    //ImGui::SliderFloat("Scan Pos", &scanPos, 0.0f, static_cast<float>(window.getWidth()));
+    ImGui::SliderFloat("aoBias", &aoBias, -1.0f, 1.0f);
+    ImGui::SliderFloat("roughnessBias", &roughnessBias, -1.0f, 1.0f);
+    ImGui::SliderFloat("metallicBias", &metallicBias, -1.0f, 1.0f);
+    ImGui::SliderFloat("Scan Pos", &scanPos, 0.0f, static_cast<float>(window.getWidth()));
     input.onImGuiRender();
 
     //ImGui::SameLine();
@@ -845,17 +895,25 @@ void Renderer::onImGuiRender()
     ImGui::SameLine();
     ImGui::Checkbox("useHeight", &hasHeight);*/
     
-    //ImGui::SliderFloat("Exposure", &exposure, 0.01f, 10.0f);
+    ImGui::SliderFloat("Exposure", &exposure, 0.01f, 10.0f);
     ImGui::SameLine();
     ImGui::Checkbox("useHdr", &useHdr);
-    ImGui::SameLine();
-    ImGui::Checkbox("useGamma", &useGamma);
-    // 
-    //ImGui::SliderFloat("samplerDistance", &samplerDistance, 0.01f, 10.0f);
     //ImGui::SameLine();
-    //ImGui::Checkbox("useBloom", &useBloom);
+    //ImGui::Checkbox("useGamma", &useGamma);
+    
+    ImGui::SliderFloat("samplerDistance", &samplerDistance, 0.01f, 10.0f);
+    ImGui::SameLine();
+    ImGui::Checkbox("useBloom", &useBloom);
 
-    //ImGui::Checkbox("useDeferred", &useDeferred);
+    ImGui::Checkbox("useDeferred", &useDeferred);
+    ImGui::SameLine();
+    ImGui::Checkbox("usePost", &usePostProcess);
+    ImGui::SameLine();
+    ImGui::Checkbox("useShadow", &useShadows);
+
+    ImGui::Checkbox("drawLights", &drawLights);
+    ImGui::SameLine();
+    ImGui::Checkbox("drawPlane", &drawPlane);
 
     scene.GetObjects()[0].transform.onImGuiRender();
 

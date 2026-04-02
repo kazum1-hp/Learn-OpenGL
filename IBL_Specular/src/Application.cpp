@@ -24,17 +24,17 @@ Application::Application(const char* title)
 void Application::init()
 {
 	glEnable(GL_DEPTH_TEST);
-	// 如果将来有更多初始化（如帧缓冲、后期处理系统），在这里统一注册
-	// 例如：
+	// If more initializations (such as framebuffers, post-processing systems) are needed in the future, they can be registered here.
+	// For example:
 	// renderer.initFrameBuffers();
 	// sceneManager.loadDefaultScene();
 	// ---------------------------------------------------------
-	// 步骤 A: 资源加载 (只做一次)
-	// 向 ResourceManager 下单，把模型数据加载到堆内存
+	// Step A: Resource loading (only once)
+	// Load model data into heap memory
 	// ---------------------------------------------------------
 	auto& res = ResourceManager::GetInstance();
 
-	// 加载 Shader
+	// Load Shader
 	res.LoadShader("model", "shader/model.vs", "shader/model.fs");
     res.LoadShader("light", "shader/light.vs", "shader/light.fs");
     res.LoadShader("scene framebuffer", "shader/framebuffer.vs", "shader/framebuffer.fs");
@@ -54,14 +54,17 @@ void Application::init()
 
 	auto model = res.LoadModel("../Assets/blue_metal_plate_4k.gltf/blue_metal_plate_4k.gltf");
 	auto material = res.LoadMaterial("material");
-	auto environmentMap = res.LoadTexture("../Assets/ferndale_studio_12_4k.hdr", HDR);
+	auto environmentMap = res.LoadTexture("../Assets/newman_cafeteria_4k.hdr", HDR);
+
+	auto envAsset = std::make_shared<EnvironmentAsset>();
+	envAsset->hdrTexture = environmentMap->getID();
 
 	mainScene.AddObject(model, glm::vec3(0.0f, -0.5f, 0.0f), glm::vec3(0.3f), material);
 	mainScene.AddPointLight(Light(glm::vec3(2.0f, 2.0f, 2.0f), 1.0f, glm::vec3(0.0f, 0.5f, 1.5f), LightType::Point));
 	mainScene.AddPointLight(Light(glm::vec3(2.0f, 2.0f, 2.0f), 1.0f, glm::vec3(-4.0f, 0.5f, -3.0f), LightType::Point));
 	mainScene.AddPointLight(Light(glm::vec3(2.0f, 2.0f, 2.0f), 1.0f, glm::vec3(3.0f, 0.5f, 1.0f), LightType::Point));
 	mainScene.AddPointLight(Light(glm::vec3(2.0f, 2.0f, 2.0f), 1.0f, glm::vec3(-0.8f, 2.4f, -1.0f), LightType::Point));
-	mainScene.SetSkybox(environmentMap->getID());
+	mainScene.SetEnvironment(envAsset);
 	renderer.init();
 }
 
@@ -135,7 +138,7 @@ void Application::run()
 void Application::update(float deltaTime)
 {
 	input.update(window.getWindow(), deltaTime);
-	// 如果将来要加入 SceneManager，可以在这里统一 update：
+	// If SceneManager is to be added in the future, it can be updated here:
 	// sceneManager.update(deltaTime);
 }
 

@@ -38,8 +38,6 @@ struct PointLight {
 uniform ParallelLight parallelLight;
 uniform PointLight pointLight[4];
 
-uniform float modelLight;
-
 uniform sampler2D depthMap;
 uniform samplerCube shadowMap[4];
 
@@ -47,13 +45,8 @@ uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D brdfLUT;
 
-uniform float aoScale;
 uniform float aoBias;
-
-uniform float roughnessScale;
 uniform float roughnessBias;
-
-uniform float metallicScale;
 uniform float metallicBias;
 
 uniform sampler2D diffuse;
@@ -68,8 +61,8 @@ uniform float height_scale;
 uniform bool hasARMMap;
 
 uniform vec3 viewPos;
-uniform bool useBlinnPhong;
 uniform bool useQuadratic;
+uniform bool usePost;
 
 uniform float far_plane;
 uniform bool parallelShadows;
@@ -166,7 +159,7 @@ void main()
 	{
 		vec3 normalTex = texture(normal, texCoords).xyz;
 		normalTex = normalTex * 2.0 - 1.0;
-		// 如果 Y 通道反了：
+		// If the Y channel is reversed：
 		//normalTex.y = -normalTex.y;
 		norm = normalize(TBN * normalTex);
 	}
@@ -177,9 +170,9 @@ void main()
 	{
         vec3 arm = texture(arm, texCoords).rgb;
 
-	    ao        = clamp(arm.r * aoScale + aoBias, 0.0, 1.0);
-	    roughness = clamp(arm.g * roughnessScale + roughnessBias, 0.0, 1.0);
-	    metallic  = clamp(arm.b * metallicScale + metallicBias, 0.0, 1.0);
+	    ao        = clamp(arm.r + aoBias, 0.01, 1.0);
+	    roughness = clamp(arm.g + roughnessBias, 0.01, 1.0);
+	    metallic  = clamp(arm.b + metallicBias, 0.01, 1.0);
     }
     else 
     {
@@ -196,7 +189,7 @@ void main()
 
 		float pointShadow = pointShadows ? PointShadowCalculation(fs_in.FragPos, N, pointLight[i], shadowMap[i]) : 0.0;
 
-		pointColor += CalPointLight(pointLight[i], norm, viewDir, pointLightDir, texColor.rgb, pointShadow, roughness, metallic) * modelLight;
+		pointColor += CalPointLight(pointLight[i], norm, viewDir, pointLightDir, texColor.rgb, pointShadow, roughness, metallic);
 	}
 
 	vec3 parallelLightDir = normalize(-parallelLight.direction);
@@ -215,7 +208,7 @@ void main()
     vec3 amDiffuse  = irradiance * albedo;
 
     // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
-    const float MAX_REFLECTION_LOD = 12.0;
+    const float MAX_REFLECTION_LOD = 10.0;
     vec3 R = reflect(-viewDir, norm);
     vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;    
     vec2 brdf  = texture(brdfLUT, vec2(max(dot(norm, viewDir), 0.0), roughness)).rg;
@@ -224,9 +217,12 @@ void main()
     vec3 ambient = (kD * amDiffuse + amSpecular) * ao;
 	vec3 textureColor = pointColor + parallelColor + ambient;
 
-    textureColor = textureColor / (textureColor + vec3(1.0));
+    if (!usePost)
+    {
+        textureColor = textureColor / (textureColor + vec3(1.0));
 
-    textureColor = vec3(pow(textureColor, vec3(1.0 / 2.2)));
+        textureColor = vec3(pow(textureColor, vec3(1.0 / 2.2)));
+    }
 
     BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
 
