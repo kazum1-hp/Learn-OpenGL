@@ -9,6 +9,7 @@
 #include <windows.h> // for MultiByteToWideChar
 #include <fstream>
 #include <vector>
+#include <filesystem> // 新增，用于检查文件存在性
 
 Texture::Texture(const std::string& path, TextureType typeName)
 	: path(path), type(typeName)
@@ -38,8 +39,23 @@ Texture::Texture(const std::string& path, TextureType typeName)
 	int wlen = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, nullptr, 0);
 	std::wstring wpath(wlen, L'\0');
 	MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, &wpath[0], wlen);
+
+	// 调试输出：打印将尝试打开的路径（宽字符）
 	std::wcout.imbue(std::locale(""));
-	//std::wcout << L"[Texture] Trying to load: " << wpath << std::endl;
+	std::wcout << L"[Texture] Trying to open (wpath): " << wpath << std::endl;
+	std::cout << "[Texture] trying to open (utf8): " << path << std::endl;
+
+	// 使用 filesystem 检查文件是否存在（帮助诊断）
+	try {
+		std::filesystem::path fp = std::filesystem::path(wpath);
+		if (!std::filesystem::exists(fp)) {
+			std::cout << "Failed to open texture file (not found): " << path << std::endl;
+			return;
+		}
+	} catch (const std::exception& e) {
+		std::cout << "Filesystem check exception: " << e.what() << " for path: " << path << std::endl;
+		// 继续尝试用 ifstream 打开
+	}
 
 	// read file to memory by using ifstream
 	std::ifstream file(wpath, std::ios::binary | std::ios::ate);
@@ -96,7 +112,7 @@ Texture::Texture(const std::string& path, TextureType typeName)
 
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		std::cerr << "Loading texture: " << path << " ID: " << ID << "texType: " << typeName << std::endl;
+		std::cerr << "Loading texture: " << path << " ID: " << ID << " texType: " << typeName << std::endl;
 		//std::cerr << "Size: " << width << "x" << height << ", Channels: " << nrChannels << std::endl;
 	}
 

@@ -21,7 +21,7 @@ public:
 	int getWidth() const { return SCR_WIDTH; }
 	int getHeight() const { return SCR_HEIGHT; }
 
-	std::function<void()> onFramebufferResize;
+	std::function<void(int, int)> onFramebufferResize;
 
 private:
 	GLFWwindow* window;

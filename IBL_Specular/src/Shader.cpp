@@ -3,7 +3,15 @@
 #include <sstream>
 #include <iostream>
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath) {
+Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath)
+	:vertexPath(vertexPath), fragmentPath(fragmentPath), geometryPath(geometryPath)
+{
+	lastVertexWriteTime = std::filesystem::last_write_time(vertexPath);
+	lastFragmentWriteTime = std::filesystem::last_write_time(fragmentPath);
+	if (!geometryPath.empty()) {
+		lastGeometryWriteTime = std::filesystem::last_write_time(geometryPath);
+	}
+
 	std::string vertexCode;
 	std::string fragmentCode;
 	std::string geometryCode;
@@ -30,7 +38,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 		vertexCode = vShaderStream.str();
 		fragmentCode = fShaderStream.str();
 		
-		if (geometryPath != nullptr)
+		// 修复：不能将 std::string 与 nullptr 比较，改为检查是否为空
+		if (!geometryPath.empty())
 		{
 			gShaderFile.open(geometryPath);
 			std::stringstream gShaderStream;
@@ -112,4 +121,145 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 			std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 		}
 	}
+}
+
+// 新增：热重载实现
+bool Shader::reload()
+{
+	// 先检查文件最后写入时间，有任何一个文件变化则尝试重载
+	std::filesystem::file_time_type vtime, ftime, gtime;
+	bool hasGeometry = !geometryPath.empty();
+	try {
+		vtime = std::filesystem::last_write_time(vertexPath);
+		ftime = std::filesystem::last_write_time(fragmentPath);
+		if (hasGeometry) gtime = std::filesystem::last_write_time(geometryPath);
+	} catch (std::filesystem::filesystem_error& e) {
+		std::cout << "ERROR::SHADER::RELOAD::FILE_TIME: " << e.what() << std::endl;
+		return false;
+	}
+
+	if (vtime == lastVertexWriteTime && ftime == lastFragmentWriteTime && (!hasGeometry || gtime == lastGeometryWriteTime)) {
+		// 未修改
+		return false;
+	}
+
+	// 读取新源码
+	std::string vertexCode;
+	std::string fragmentCode;
+	std::string geometryCode;
+	std::ifstream vShaderFile;
+	std::ifstream fShaderFile;
+	std::ifstream gShaderFile;
+
+	try {
+		vShaderFile.open(vertexPath);
+		fShaderFile.open(fragmentPath);
+		std::stringstream vShaderStream, fShaderStream;
+		vShaderStream << vShaderFile.rdbuf();
+		fShaderStream << fShaderFile.rdbuf();
+		vShaderFile.close();
+		fShaderFile.close();
+		vertexCode = vShaderStream.str();
+		fragmentCode = fShaderStream.str();
+
+		if (hasGeometry) {
+			gShaderFile.open(geometryPath);
+			std::stringstream gShaderStream;
+			gShaderStream << gShaderFile.rdbuf();
+			gShaderFile.close();
+			geometryCode = gShaderStream.str();
+		}
+	}
+	catch (std::ifstream::failure& e)
+	{
+		std::cout << "ERROR::SHADER::RELOAD::FILE_NOT_READ: " << e.what() << std::endl;
+		return false;
+	}
+
+	const char* vShaderCode = vertexCode.c_str();
+	const char* fShaderCode = fragmentCode.c_str();
+
+	// 创建 & 编译新 shader
+	GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+	GLuint geometry = 0;
+
+	glShaderSource(vertex, 1, &vShaderCode, nullptr);
+	glCompileShader(vertex);
+	GLint success = 0;
+	glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		char infoLog[1024];
+		glGetShaderInfoLog(vertex, 1024, NULL, infoLog);
+		std::cout << "ERROR::SHADER::RELOAD::VERTEX_COMPILATION_FAILED\n" << infoLog << std::endl;
+		glDeleteShader(vertex);
+		return false;
+	}
+
+	glShaderSource(fragment, 1, &fShaderCode, nullptr);
+	glCompileShader(fragment);
+	glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		char infoLog[1024];
+		glGetShaderInfoLog(fragment, 1024, NULL, infoLog);
+		std::cout << "ERROR::SHADER::RELOAD::FRAGMENT_COMPILATION_FAILED\n" << infoLog << std::endl;
+		glDeleteShader(vertex);
+		glDeleteShader(fragment);
+		return false;
+	}
+
+	if (hasGeometry) {
+		const char* gShaderCode = geometryCode.c_str();
+		geometry = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(geometry, 1, &gShaderCode, nullptr);
+		glCompileShader(geometry);
+		glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
+		if (!success) {
+			char infoLog[1024];
+			glGetShaderInfoLog(geometry, 1024, NULL, infoLog);
+			std::cout << "ERROR::SHADER::RELOAD::GEOMETRY_COMPILATION_FAILED\n" << infoLog << std::endl;
+			glDeleteShader(vertex);
+			glDeleteShader(fragment);
+			glDeleteShader(geometry);
+			return false;
+		}
+	}
+
+	// 链接新程序
+	GLuint newProgram = glCreateProgram();
+	glAttachShader(newProgram, vertex);
+	glAttachShader(newProgram, fragment);
+	if (hasGeometry) glAttachShader(newProgram, geometry);
+
+	glLinkProgram(newProgram);
+	glGetProgramiv(newProgram, GL_LINK_STATUS, &success);
+	if (!success) {
+		char infoLog[1024];
+		glGetProgramInfoLog(newProgram, 1024, NULL, infoLog);
+		std::cout << "ERROR::SHADER::RELOAD::PROGRAM_LINKING_FAILED\n" << infoLog << std::endl;
+		// 清理
+		glDeleteShader(vertex);
+		glDeleteShader(fragment);
+		if (hasGeometry) glDeleteShader(geometry);
+		glDeleteProgram(newProgram);
+		return false;
+	}
+
+	// 链接成功：替换旧 program
+	glDeleteProgram(ID); // 删除旧程序
+	ID = newProgram;
+
+	// 删除 shaders（已 attach 并已链接）
+	glDeleteShader(vertex);
+	glDeleteShader(fragment);
+	if (hasGeometry) glDeleteShader(geometry);
+
+	// 清空 uniform 缓存并更新写入时间
+	uniformCache.clear();
+	lastVertexWriteTime = vtime;
+	lastFragmentWriteTime = ftime;
+	if (hasGeometry) lastGeometryWriteTime = gtime;
+
+	std::cout << "INFO::SHADER::RELOADED: " << vertexPath << " / " << fragmentPath << (hasGeometry ? (" / " + geometryPath) : "") << std::endl;
+	return true;
 }

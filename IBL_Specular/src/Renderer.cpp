@@ -1,10 +1,20 @@
 #include "../head/Renderer.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <string>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/matrix_access.hpp>
 #include "../head/ResourceManager.h"
 #include "../head/Scene.h"
+#include <cstdio> // for std::snprintf
+
+static inline void SafeCopyPath(char* dest, size_t destSize, const std::string& src)
+{
+    if (dest == nullptr || destSize == 0) return;
+    // 使用 snprintf 执行安全拷贝并保证 null-terminate
+    std::snprintf(dest, destSize, "%s", src.c_str());
+    dest[destSize - 1] = '\0';
+}
 
 Renderer::Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene)
     :camera(cam),
@@ -12,17 +22,20 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene)
      window(win),
      scene(scene)
 {
+    framebufferWidth = window.getWidth();
+    framebufferHeight = window.getHeight();
+
     framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/true, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/useHdr, 2));
     framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, true, false, false));
     framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/false, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/true, 4, /*useGbuffer*/true));
     framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/true, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/useHdr, 2));
-    //framebuffers.push_back(std::make_unique<FrameBuffer>(resolution, resolution, /*useDepth*/true, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/false, 0));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/true, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/false));
 
     pingpongFrameBuffer[0] = std::make_unique<FrameBuffer>(window, false, false, false, false, true);
     pingpongFrameBuffer[1] = std::make_unique<FrameBuffer>(window, false, false, false, false, true);
 
-    window.onFramebufferResize = [this]() {
-        this->resizeFrameBuffer();
+    window.onFramebufferResize = [this](int w, int h) {
+        glViewport(0, 0, w, h);
         };
 
     // --- glEnable ---
@@ -287,7 +300,7 @@ void Renderer::generateIBLMaps(Environment& env)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glViewport(0, 0, window.getWidth(), window.getHeight());
+    glViewport(0, 0, framebufferWidth, framebufferHeight);
 }
 
 void Renderer::render(Scene& scene)
@@ -304,24 +317,28 @@ void Renderer::render(Scene& scene)
 
     FrameBuffer& hdrFrameBuffer = *framebuffers[0];
     FrameBuffer& lightPassFrameBuffer = *framebuffers[3];
+    FrameBuffer& postProcessFrameBuffer = *framebuffers[4];
 
     if (!useDeferred)
     {        
         if (usePostProcess)
         {
-            glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer.getFBO());
             forwardPass(scene);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
             postProcessPass(hdrFrameBuffer);
+            finalTexture = postProcessFrameBuffer.getColor();
         }
 
         else
+        {
             forwardPass(scene);
+            finalTexture = hdrFrameBuffer.getColor();
+        }
     }
     else
     {
         deferredPass(scene);
         postProcessPass(lightPassFrameBuffer);
+        finalTexture = postProcessFrameBuffer.getColor();
     }
 }
 
@@ -386,7 +403,7 @@ void Renderer::shadowPass(Scene& scene)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glViewport(0, 0, window.getWidth(), window.getHeight());
+    glViewport(0, 0, framebufferWidth, framebufferHeight);
 }
 
 void Renderer::forwardPass(Scene& scene)
@@ -396,10 +413,10 @@ void Renderer::forwardPass(Scene& scene)
     FrameBuffer& parallelShadowFrameBuffer = *framebuffers[1];
 
     auto& env = scene.GetEnvironment();
-
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[0]->getFBO());
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    glViewport(0, 0, framebufferWidth, framebufferHeight); 
     // object
     modelShader->use();
 
@@ -526,6 +543,8 @@ void Renderer::forwardPass(Scene& scene)
     cube->draw();
 
     glEnable(GL_CULL_FACE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 
 void Renderer::postProcessPass(const FrameBuffer& framebuffer)
@@ -557,6 +576,9 @@ void Renderer::postProcessPass(const FrameBuffer& framebuffer)
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[4]->getFBO());
+    glViewport(0, 0, framebufferWidth, framebufferHeight);
 
     sceneFramebufferShader->use();
 
@@ -787,7 +809,7 @@ void Renderer::lightPass(Scene& scene)
     drawDebug(gAlbedoSpec, 2);
     drawDebug(gDepth, 3);
 
-    glViewport(0, 0, window.getWidth(), window.getHeight());
+    glViewport(0, 0, framebufferWidth, framebufferHeight);
     glEnable(GL_DEPTH_TEST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -846,68 +868,126 @@ void Renderer::renderModel(const Transform& transform, const Model& model, Shade
     model.draw();
 }
 
-void Renderer::resizeFrameBuffer()
+void Renderer::resizeFrameBuffer(unsigned int newWidth, unsigned int newHeight)
 {
     FrameBuffer& hdrFrameBuffer = *framebuffers[0];
     FrameBuffer& gFrameBuffer = *framebuffers[2];
     FrameBuffer& lightPassFrameBuffer = *framebuffers[3];
+    FrameBuffer& postProcessFrameBuffer = *framebuffers[4];
 
-    hdrFrameBuffer.resize(window.getWidth(), window.getHeight());
-    gFrameBuffer.resize(window.getWidth(), window.getHeight());
-    lightPassFrameBuffer.resize(window.getWidth(), window.getHeight());
-    pingpongFrameBuffer[0]->resize(window.getWidth(), window.getHeight());
-    pingpongFrameBuffer[1]->resize(window.getWidth(), window.getHeight());
+    hdrFrameBuffer.resize(newWidth, newHeight);
+    gFrameBuffer.resize(newWidth, newHeight);
+    lightPassFrameBuffer.resize(newWidth, newHeight);
+    postProcessFrameBuffer.resize(newWidth, newHeight);
+    pingpongFrameBuffer[0]->resize(newWidth, newHeight);
+    pingpongFrameBuffer[1]->resize(newWidth, newHeight);
 
-    camera.aspect = (float)window.getWidth() / (float)window.getHeight();
+    camera.aspect = (float)newWidth / (float)newHeight;
+
+    framebufferWidth = newWidth;
+    framebufferHeight = newHeight;
 }
 
 void Renderer::onImGuiRender()
 {
-    ImGui::Begin("Post Processing");
-    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+    // --- DockSpace / Layout setup (full-screen) ---
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+    {
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-    //dirLight.dirOnImGuiRender();
+        ImGuiWindowFlags host_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+            ImGuiWindowFlags_MenuBar;
+
+        ImGui::Begin("MainDockSpace", nullptr, host_flags);
+        ImGui::PopStyleVar(2);
+
+        ImGuiID dockspace_id = ImGui::GetID("MainDockSpaceID");
+        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+        // One-time DockBuilder layout
+        static bool s_dock_init = false;
+        if (!s_dock_init)
+        {
+            s_dock_init = true;
+            ImGui::DockBuilderRemoveNode(dockspace_id);
+            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+
+            ImGuiID dock_main_id = dockspace_id;
+            ImGuiID left_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.25f, nullptr, &dock_main_id);
+            ImGuiID bottom_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.25f, nullptr, &dock_main_id);
+
+            // Dock windows by exact names used below
+            ImGui::DockBuilderDockWindow("Light Control", left_id);
+            ImGui::DockBuilderDockWindow("Renderer Settings", left_id);
+            ImGui::DockBuilderDockWindow("Post Processing", left_id);
+            ImGui::DockBuilderDockWindow("Scene", dock_main_id);
+            ImGui::DockBuilderDockWindow("Shaders", bottom_id);
+            ImGui::DockBuilderDockWindow("Hot Reload Assets", bottom_id);
+
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
+
+        ImGui::End(); // End MainDockSpace
+    }
+
+    ImGui::Begin("Light Control");
+
+    ImGui::Text("Point Lights");
     for (int i = 0; i < scene.GetPointLights().size(); ++i)
     {
         scene.GetPointLights()[i].pointOnImGuiRender(i);
     }
 
+    ImGui::Text("Dir Lights");
     scene.GetDirLight().dirOnImGuiRender();
 
-    ImGui::Combo("Effect Mode", &effectMode, "normal\0inversion\0grayscale\0sharpen\0blur\0\0");
-    if (effectMode == 3 || effectMode == 4)
+    ImGui::End();
+
+    ImGui::Begin("Post Processing");
+    ImGui::Checkbox("usePost", &usePostProcess);
+
+    if (usePostProcess)
     {
-        ImGui::SliderFloat("Offset", &offset, 100.0f, 1000.0f);
+        ImGui::Checkbox("useHdr", &useHdr);
+        if (useHdr)
+            ImGui::SliderFloat("Exposure", &exposure, 0.01f, 10.0f);
+
+        if (drawLights)
+        {
+            ImGui::Checkbox("useBloom", &useBloom);
+            if (useBloom)
+                ImGui::SliderFloat("samplerDistance", &samplerDistance, 0.01f, 10.0f);
+        }
+
+        ImGui::Combo("Effect Mode", &effectMode, "normal\0inversion\0grayscale\0sharpen\0blur\0\0");
+        if (effectMode == 3 || effectMode == 4)
+        {
+            ImGui::SliderFloat("Offset", &offset, 100.0f, 1000.0f);
+        }
+        ImGui::SliderFloat("Scan Pos", &scanPos, 0.0f, static_cast<float>(window.getWidth()));
     }
-    //ImGui::SliderFloat("Model Light", &modelLight, 0.1f, 1.0f);
+
+    ImGui::End();
+
+    ImGui::Begin("Renderer Settings");
 
     ImGui::SliderFloat("aoBias", &aoBias, -1.0f, 1.0f);
     ImGui::SliderFloat("roughnessBias", &roughnessBias, -1.0f, 1.0f);
     ImGui::SliderFloat("metallicBias", &metallicBias, -1.0f, 1.0f);
-    ImGui::SliderFloat("Scan Pos", &scanPos, 0.0f, static_cast<float>(window.getWidth()));
     input.onImGuiRender();
 
-    //ImGui::SameLine();
-    
     ImGui::Checkbox("useNormal", &hasNormal);
-    
-    /*ImGui::SliderFloat("height_scale", &height_scale, 0.0005f, 0.01f);
     ImGui::SameLine();
-    ImGui::Checkbox("useHeight", &hasHeight);*/
-    
-    ImGui::SliderFloat("Exposure", &exposure, 0.01f, 10.0f);
-    ImGui::SameLine();
-    ImGui::Checkbox("useHdr", &useHdr);
-    //ImGui::SameLine();
-    //ImGui::Checkbox("useGamma", &useGamma);
-    
-    ImGui::SliderFloat("samplerDistance", &samplerDistance, 0.01f, 10.0f);
-    ImGui::SameLine();
-    ImGui::Checkbox("useBloom", &useBloom);
-
     ImGui::Checkbox("useDeferred", &useDeferred);
-    ImGui::SameLine();
-    ImGui::Checkbox("usePost", &usePostProcess);
     ImGui::SameLine();
     ImGui::Checkbox("useShadow", &useShadows);
 
@@ -915,7 +995,218 @@ void Renderer::onImGuiRender()
     ImGui::SameLine();
     ImGui::Checkbox("drawPlane", &drawPlane);
 
-    scene.GetObjects()[0].transform.onImGuiRender();
+    if (!scene.GetObjects().empty())
+        scene.GetObjects()[0].transform.onImGuiRender();
+
+    ImGui::End();
+
+    // --- Shader reload panel (keep separate for clarity) ---
+    ImGui::Begin("Shaders");
+    static std::string lastReloadMsg = "Idle";
+
+    if (ImGui::Button("Reload Shaders")) {
+        auto results = ResourceManager::GetInstance().ReloadAllShaders();
+        std::string msg;
+
+        auto applyDefaults = [&](const std::string& name) {
+            if (name == "model" && modelShader) {
+                modelShader->use();
+                modelShader->setUniform("irradianceMap", 9);
+                modelShader->setUniform("prefilterMap", 10);
+                modelShader->setUniform("brdfLUT", 11);
+                // point light constants previously set in init
+                for (int i = 0; i < static_cast<int>(scene.GetPointLights().size()); ++i) {
+                    std::string base = "pointLight[" + std::to_string(i) + "]";
+                    modelShader->setUniform(base + ".constant", 1.0f);
+                    modelShader->setUniform(base + ".linear", 0.09f);
+                    modelShader->setUniform(base + ".quadratic", 0.032f);
+                }
+            }
+            else if (name == "scene framebuffer" && sceneFramebufferShader) {
+                sceneFramebufferShader->use();
+                sceneFramebufferShader->setUniform("screenTexture", 0);
+                sceneFramebufferShader->setUniform("blur", 1);
+                sceneFramebufferShader->setUniform("useGamma", useGamma);
+                sceneFramebufferShader->setUniform("useHdr", useHdr);
+                sceneFramebufferShader->setUniform("useBloom", useBloom);
+                sceneFramebufferShader->setUniform("exposure", exposure);
+            }
+            else if (name == "bloomBlur" && bloomBlurShader) {
+                bloomBlurShader->use();
+                bloomBlurShader->setUniform("image", 0);
+            }
+            else if (name == "background" && backgroundShader) {
+                backgroundShader->use();
+                backgroundShader->setUniform("environmentMap", 0);
+            }
+            else if (name == "lightPass" && lightPassShader) {
+                lightPassShader->use();
+                lightPassShader->setUniform("gPosition", 0);
+                lightPassShader->setUniform("gNormal", 1);
+                lightPassShader->setUniform("gAlbedoSpec", 2);
+                lightPassShader->setUniform("gGeoNormal", 3);
+                lightPassShader->setUniform("gDepth", 4);
+                lightPassShader->setUniform("material.shininess", ResourceManager::GetInstance().GetMaterial("material")->getShininess());
+                for (int i = 0; i < static_cast<int>(scene.GetPointLights().size()); ++i) {
+                    std::string base = "pointLight[" + std::to_string(i) + "]";
+                    lightPassShader->setUniform(base + ".constant", 1.0f);
+                    lightPassShader->setUniform(base + ".linear", 0.09f);
+                    lightPassShader->setUniform(base + ".quadratic", 0.032f);
+                }
+            }
+            else if (name == "irradiance" && irradianceShader) {
+                irradianceShader->use();
+                irradianceShader->setUniform("environmentMap", 0);
+            }
+            else if (name == "prefilter" && prefilterShader) {
+                prefilterShader->use();
+                prefilterShader->setUniform("environmentMap", 0);
+            }
+        };
+
+        for (const auto& r : results) {
+            msg += r.first + (r.second ? ": reloaded\n" : ": no change or failed\n");
+            if (r.second) applyDefaults(r.first);
+        }
+        lastReloadMsg = msg;
+    }
+
+    ImGui::Separator();
+    ImGui::TextWrapped("%s", lastReloadMsg.c_str());
+    ImGui::End();
+
+    // --- Hot reload assets with file browser (Model / HDR) ---
+    ImGui::Begin("Hot Reload Assets");
+    static char modelPathBuf[1024] = "../Assets/blue_metal_plate_4k.gltf/blue_metal_plate_4k.gltf";
+    static char hdrPathBuf[1024] = "../Assets/newman_cafeteria_4k.hdr";
+    static std::string hotReloadMsg = "Idle";
+
+    ImGui::InputText("Model Path", modelPathBuf, sizeof(modelPathBuf));
+    //ImGui::SameLine();
+    if (ImGui::Button("Browse Model...")) {
+        // 准备一个 FileDialogConfig 并设置 path
+        IGFD::FileDialogConfig cfg;
+        cfg.path = "."; // 起始目录（可改为其他）
+
+        // 打开文件对话框
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseModelDlg", "Choose Model", ".gltf,.glb", cfg);
+    }
+
+    // Display model file dialog and auto-load on selection
+    if (ImGuiFileDialog::Instance()->Display("ChooseModelDlg")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            std::string chosen = ImGuiFileDialog::Instance()->GetFilePathName(); // 注意大小写
+            SafeCopyPath(modelPathBuf, sizeof(modelPathBuf), chosen);
+            modelPathBuf[sizeof(modelPathBuf)-1] = '\0';
+
+            // Load/replace model immediately (replace first object)
+            auto& res = ResourceManager::GetInstance();
+            auto mdl = res.LoadModel(chosen);
+            if (mdl) {
+                if (!scene.GetObjects().empty())
+                    scene.GetObjects()[0].model = mdl;
+                else
+                    scene.AddObject(mdl);
+                hotReloadMsg = "Model loaded: " + chosen;
+            } else {
+                hotReloadMsg = "Failed to load model: " + chosen;
+            }
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Reload Model (same path)")) {
+        std::string path(modelPathBuf);
+        bool ok = ResourceManager::GetInstance().ReloadModel(path);
+        hotReloadMsg = ok ? ("Reloaded model: " + path) : ("Reload model failed: " + path);
+    }
+
+    ImGui::Separator();
+
+    ImGui::InputText("HDR Path", hdrPathBuf, sizeof(hdrPathBuf));
+    //ImGui::SameLine();
+    if (ImGui::Button("Browse HDR...")) {
+        IGFD::FileDialogConfig cfg2;
+        cfg2.path = ".";
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseHdrDlg", "Choose HDR", ".hdr", cfg2);
+    }
+
+    if (ImGuiFileDialog::Instance()->Display("ChooseHdrDlg")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            std::string chosen = ImGuiFileDialog::Instance()->GetFilePathName();
+            SafeCopyPath(hdrPathBuf, sizeof(hdrPathBuf), chosen);
+            hdrPathBuf[sizeof(hdrPathBuf)-1] = '\0';
+
+            auto& res = ResourceManager::GetInstance();
+            auto tex = res.LoadTexture(chosen, HDR);
+            if (tex) {
+                if (!scene.GetEnvironment().asset) {
+                    auto asset = std::make_shared<EnvironmentAsset>();
+                    scene.SetEnvironment(asset);
+                }
+                scene.GetEnvironment().asset->hdrTexture = tex->getID();
+                scene.GetEnvironment().maps.isGenerated = false;
+                hotReloadMsg = "HDR loaded: " + chosen;
+            } else {
+                hotReloadMsg = "Failed to load HDR: " + chosen;
+            }
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Reload HDR (same path)")) {
+        std::string path(hdrPathBuf);
+        auto tex = ResourceManager::GetInstance().ReloadTexture(path, HDR);
+        if (tex) {
+            if (!scene.GetEnvironment().asset) {
+                auto asset = std::make_shared<EnvironmentAsset>();
+                scene.SetEnvironment(asset);
+            }
+            scene.GetEnvironment().asset->hdrTexture = tex->getID();
+            scene.GetEnvironment().maps.isGenerated = false;
+            hotReloadMsg = "Reloaded HDR: " + path;
+        } else {
+            hotReloadMsg = "Reload HDR failed: " + path;
+        }
+    }
+
+    ImGui::NewLine();
+    ImGui::TextWrapped("%s", hotReloadMsg.c_str());
+    ImGui::End();
+
+    ImGui::Begin("Scene");
+    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+
+    bool sceneHovered = ImGui::IsWindowHovered();
+    input.setSceneHovered(sceneHovered);
+    ImVec2 size = ImGui::GetContentRegionAvail();
+
+    unsigned int newWidth = (unsigned int)size.x;
+    unsigned int newHeight = (unsigned int)size.y;
+
+    if (newWidth > 0 && newHeight > 0 &&
+        (newWidth != framebufferWidth || newHeight != framebufferHeight)
+        && !ImGui::IsMouseDown(0))
+    {
+        resizeFrameBuffer(newWidth, newHeight);
+    }
+
+    if (finalTexture != 0)
+    {
+        ImGui::Image(
+            (ImTextureID)(intptr_t)finalTexture,
+            size,
+            ImVec2(0, 1),   // 翻转
+            ImVec2(1, 0)
+        );
+    }
+    else
+    {
+        ImGui::Text("No Render Output");
+    }
 
     ImGui::End();
 }
+

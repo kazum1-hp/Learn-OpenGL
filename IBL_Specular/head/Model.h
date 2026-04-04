@@ -26,6 +26,8 @@ public:
 
 	void enableInstancing(const std::vector<glm::mat4>& instanceTransforms);
 
+	void reload(const std::string& path);
+
 private:
 	void loadModel(const std::string& path);
 	std::unique_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);

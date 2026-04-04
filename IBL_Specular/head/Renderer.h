@@ -10,6 +10,9 @@
 #include "Window.h"
 #include "Transform.h"
 #include "../external/imgui/imgui.h"
+#include "../external/imgui/imgui_internal.h"
+#include "../external/ImGuiFileDialog-master/ImGuiFileDialog.h"
+#include "../external/ImGuiFileDialog-master/ImGuiFileDialogConfig.h"
 
 #include <vector>
 #include <memory>
@@ -103,19 +106,18 @@ private:
 	bool usePostProcess = false;
 	bool drawLights = false;
 	bool drawPlane = false;
-
+	
+	int framebufferWidth;
+	int framebufferHeight;
+	unsigned int finalTexture = 0;
+	// ------------------------------------------------------------------------------
 	void prepareEnvironment(Environment& env);
 	void generateIBLMaps(Environment& env);
 
-public:
-	Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene);
-	void init();
-	void render(Scene& scene);
 	void renderModel(const Transform& transform, const Model& model, Shader& shader);
 	void drawMesh(const Mesh& mesh, Shader& shader) const;
 	void drawModel(const Model& model, Shader& shader) const;
-	void resizeFrameBuffer();
-	void onImGuiRender();
+	void resizeFrameBuffer(unsigned int newWidth, unsigned int newHeight);
 
 	void forwardPass(Scene& scene);
 	void deferredPass(Scene& scene);
@@ -123,5 +125,11 @@ public:
 	void geometryPass(Scene& scene);
 	void lightPass(Scene& scene);
 	void postProcessPass(const FrameBuffer& framebuffer);
+
+public:
+	Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene);
+	void init();
+	void render(Scene& scene);
+	void onImGuiRender();
 };
 

@@ -1,6 +1,7 @@
 #include "../head/Model.h"
 #include <iostream>
 #include <filesystem>
+
 Model::Model(const std::string& path)
 {
 	loadModel(path);
@@ -31,6 +32,18 @@ void Model::enableInstancing(const std::vector<glm::mat4>& instanceTransforms)
     }
 }
 
+// 新增：安全地在当前实例上重新加载模型
+void Model::reload(const std::string& path)
+{
+    // 清理以前的数据（unique_ptr 会在析构时删除 GPU 资源）
+    meshes.clear();
+    loadedTextures.clear();
+    directory.clear();
+
+    // 重新加载
+    loadModel(path);
+}
+
 void Model::loadModel(const std::string& path)
 {
 	Assimp::Importer importer;
@@ -44,7 +57,9 @@ void Model::loadModel(const std::string& path)
 		return;
 	}
 
-	directory = path.substr(0, path.find_last_of("/"));
+	// 使用 std::filesystem 获取父目录，兼容不同路径风格
+	std::filesystem::path p(path);
+	directory = p.parent_path().string();
 
 	for (unsigned int i = 0; i < scene->mNumMeshes; i++)
 	{
@@ -142,7 +157,10 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
 		aiString str;
 		mat->GetTexture(type, i, &str);
 
-		std::string path = directory + "/" + str.C_Str();
+		// 使用 filesystem 拼接，避免手工拼接错误
+		std::filesystem::path texpath = std::filesystem::path(directory) / std::filesystem::path(str.C_Str());
+		std::string path = texpath.string();
+
 		std::cout << "[Assimp] Found texture: " << path << " | Type: " << typeName << std::endl;
 
 		if (loadedTextures.find(path) == loadedTextures.end()) 
@@ -161,24 +179,6 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
 
 		textures.push_back(loadedTextures[path]);
 	}
-
-	/*for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
-		std::string file = entry.path().string();
-		std::string lower = file;
-		std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-
-		if (lower.find("disp") != std::string::npos ||
-			lower.find("height") != std::string::npos)
-		{
-			std::cout << "[Assimp] Extra Height Map Found: " << file << std::endl;
-
-			if (loadedTextures.find(file) == loadedTextures.end())
-				loadedTextures[file] = std::make_shared<Texture>(file, TextureType::Height);
-
-			textures.push_back(loadedTextures[file]);
-			break;
-		}
-	}*/
 
 	return textures;
 }

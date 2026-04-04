@@ -7,20 +7,46 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <filesystem>
 
 class Shader
 {
 public:
 	unsigned int ID;
 
-	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
+	Shader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath = "");
 
 	void use() const;
 
 	template<typename T>
 	void setUniform(const std::string& name, const T& value) const;
 
+	const std::string& GetVertexPath() const { return vertexPath; }
+	const std::string& GetFragmentPath() const { return fragmentPath; }
+	const std::string& GetGeometryPath() const { return geometryPath; }
+
+	std::filesystem::file_time_type GetLastVertexWriteTime() const { return lastVertexWriteTime; }
+	std::filesystem::file_time_type GetLastFragmentWriteTime() const { return lastFragmentWriteTime; }
+	std::filesystem::file_time_type GetLastGeometryWriteTime() const { return lastGeometryWriteTime; }
+
+	void updateWriteTimes() {
+		lastVertexWriteTime = std::filesystem::last_write_time(vertexPath);
+		lastFragmentWriteTime = std::filesystem::last_write_time(fragmentPath);
+		lastGeometryWriteTime= std::filesystem::last_write_time(geometryPath);
+	}
+
+	// 新增：尝试热重载，若成功返回 true（替换程序）；失败或未修改返回 false
+	bool reload();
+
 private:
+	std::string vertexPath;
+	std::string fragmentPath;
+	std::string geometryPath;
+
+	std::filesystem::file_time_type lastVertexWriteTime;
+	std::filesystem::file_time_type lastFragmentWriteTime;
+	std::filesystem::file_time_type lastGeometryWriteTime;
+
 	void checkCompileErrors(unsigned int shader, std::string type);
 	
 	//Cache glGetUniformLocation

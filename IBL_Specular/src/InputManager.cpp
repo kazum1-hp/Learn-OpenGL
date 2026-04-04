@@ -35,13 +35,16 @@ void InputManager::onMouseMove(double xpos, double ypos)
 
 void InputManager::onScroll(double xoffset, double yoffset)
 {
+	if (!sceneHovered)
+		return;
+
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
 void InputManager::handleCursor(GLFWwindow* window)
 {
 	ImGuiIO& io = ImGui::GetIO();
-	mouseOverImGui = io.WantCaptureMouse;
+	mouseOverImGui = io.WantCaptureMouse && !sceneHovered;
 
 	bool altNow = glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS;
 	if (altNow != altPressed)

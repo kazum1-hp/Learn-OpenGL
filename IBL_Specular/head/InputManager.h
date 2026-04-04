@@ -24,6 +24,7 @@ public:
 	bool isSpotLightOn() const { return spotLightOn; }
 
 	void onImGuiRender();
+	void setSceneHovered(bool hovered) { sceneHovered = hovered; }
 
 private:
 	void handleCursor(GLFWwindow* window);
@@ -52,5 +53,7 @@ private:
 	bool cursorVisible = false;
 	bool altPressed = false;
 	bool mouseOverImGui = false;
+
+	bool sceneHovered = false;
 };
 

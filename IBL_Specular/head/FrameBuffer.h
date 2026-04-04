@@ -44,5 +44,7 @@ public:
 	GLuint getGDepth() const { return gDepth; }
 	GLuint getDepth2D() const { return texDepth2D; }
 	GLuint getDepthCube() const { return texDepthCube; }
+	unsigned int getWidth() const { return width; }
+	unsigned int getHeight() const { return height; }
 };
 

@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <array>
+#include <vector>
 
 #include "glm/glm.hpp"
 #include <glm/gtc/matrix_transform.hpp>
@@ -32,7 +33,7 @@ public:
     std::shared_ptr<Shader> LoadShader(const std::string& name, const std::string& vsPath, const std::string& fsPath, const std::string& gsPath = "") {
         if (shaders.find(name) != shaders.end()) return shaders[name];
 
-        auto shader = std::make_shared<Shader>(vsPath.c_str(), fsPath.c_str(), gsPath.empty() ? nullptr : gsPath.c_str());
+        auto shader = std::make_shared<Shader>(vsPath, fsPath, gsPath);
         shaders[name] = shader;
         return shader;
     }
@@ -41,6 +42,31 @@ public:
         if (shaders.find(name) != shaders.end()) return shaders[name];
         std::cerr << "Shader not found: " << name << std::endl;
         return nullptr;
+    }
+
+    // 新增：按名重载单个 shader（在有 GL context 的线程调用）
+    bool ReloadShader(const std::string& name) {
+        auto it = shaders.find(name);
+        if (it == shaders.end()) {
+            std::cerr << "ReloadShader: not found: " << name << std::endl;
+            return false;
+        }
+        if (!it->second) return false;
+        return it->second->reload();
+    }
+
+    // 新增：重载所有已加载的 shader，返回每个 shader 的重载结果
+    std::vector<std::pair<std::string, bool>> ReloadAllShaders() {
+        std::vector<std::pair<std::string, bool>> results;
+        results.reserve(shaders.size());
+        for (auto& kv : shaders) {
+            bool ok = false;
+            if (kv.second) {
+                ok = kv.second->reload();
+            }
+            results.emplace_back(kv.first, ok);
+        }
+        return results;
     }
 
     // --- Texture ---
@@ -52,6 +78,13 @@ public:
         return tex;
     }
 
+    // 新增：替换/重载纹理（返回新 shared_ptr）
+    std::shared_ptr<Texture> ReloadTexture(const std::string& path, TextureType type = Diffuse) {
+        auto tex = std::make_shared<Texture>(path, type);
+        textures[path] = tex;
+        return tex;
+    }
+
     // --- Model ---
     std::shared_ptr<Model> LoadModel(const std::string& path) {
         if (models.find(path) != models.end()) return models[path];
@@ -59,6 +92,26 @@ public:
         auto model = std::make_shared<Model>(path);
         models[path] = model;
         return model;
+    }
+
+    // 新增：按路径在已有 Model 实例上重载（若已 load 则调用 model->reload；若未 load 则 LoadModel）
+    bool ReloadModel(const std::string& path) {
+        auto it = models.find(path);
+        if (it == models.end()) {
+            // 尚未加载，直接加载并返回是否成功
+            try {
+                auto model = std::make_shared<Model>(path);
+                models[path] = model;
+                return true;
+            } catch (...) {
+                return false;
+            }
+        } else {
+            if (!it->second) return false;
+            // 调用 Model::reload（需要 Model 提供该方法）
+            it->second->reload(path);
+            return true;
+        }
     }
 
     // --- Material ---

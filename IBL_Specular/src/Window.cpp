@@ -67,10 +67,9 @@ void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height
 		std::cout << "Framebuffer resized: " << width << " x " << height << std::endl;
 
 		if (win->onFramebufferResize) {
-			win->onFramebufferResize();
+			win->onFramebufferResize(width, height);
 		}
 	}
-	
 }
 
 void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)

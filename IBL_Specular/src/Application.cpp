@@ -73,7 +73,20 @@ void Application::initImGui()
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	// Enable docking and multi-viewport (allows windows to be dragged outside main window)
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // optional: keyboard controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // enable docking
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     // enable multi-viewport / platform windows
+
 	ImGui::StyleColorsDark();
+
+	// When viewports enabled, tweak style for platform windows
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+	}
 
 	ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
 	ImGui_ImplOpenGL3_Init("#version 330");
@@ -123,6 +136,15 @@ void Application::run()
 		// render ImGui
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// Update and render additional platform windows when viewports are enabled
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
 
 		// Swap buffers and poll IO events
 		glfwSwapBuffers(window.getWindow());
