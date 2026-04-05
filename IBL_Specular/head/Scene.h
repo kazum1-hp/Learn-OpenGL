@@ -26,7 +26,7 @@ struct EnvironmentMaps {
     GLuint brdfLUT = 0;
 
     bool isGenerated = false;
-    GLuint lastHDR = 0; // 防止重复生成
+    GLuint lastHDR = 0; // Prevent duplicate generation
 };
 
 struct Environment {
@@ -64,7 +64,7 @@ public:
 
     void SetEnvironment(std::shared_ptr<EnvironmentAsset> envAsset) {
         environment.asset = envAsset;
-        environment.maps.isGenerated = false; // 标记需要重新生成
+        environment.maps.isGenerated = false; // The tag needs to be regenerated.
     }
 
     // --- Getters ---

@@ -32,15 +32,15 @@ void Model::enableInstancing(const std::vector<glm::mat4>& instanceTransforms)
     }
 }
 
-// 新增：安全地在当前实例上重新加载模型
+// New: Safely reload the model on the current instance
 void Model::reload(const std::string& path)
 {
-    // 清理以前的数据（unique_ptr 会在析构时删除 GPU 资源）
+    // Clean up previous data (unique_ptr will delete GPU resources during destruction).
     meshes.clear();
     loadedTextures.clear();
     directory.clear();
 
-    // 重新加载
+    // Reload
     loadModel(path);
 }
 
@@ -57,7 +57,7 @@ void Model::loadModel(const std::string& path)
 		return;
 	}
 
-	// 使用 std::filesystem 获取父目录，兼容不同路径风格
+	// Use std::filesystem to get the parent directory, compatible with different path styles.
 	std::filesystem::path p(path);
 	directory = p.parent_path().string();
 
@@ -157,7 +157,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
 		aiString str;
 		mat->GetTexture(type, i, &str);
 
-		// 使用 filesystem 拼接，避免手工拼接错误
+		// Use filesystem concatenation to avoid errors from manual concatenation.
 		std::filesystem::path texpath = std::filesystem::path(directory) / std::filesystem::path(str.C_Str());
 		std::string path = texpath.string();
 

@@ -26,7 +26,7 @@ void InputManager::onMouseMove(double xpos, double ypos)
 	}
 
 	float xoffset = static_cast<float>(xpos - lastX);
-	float yoffset = static_cast<float>(lastY - ypos); // ∑¥œÚY
+	float yoffset = static_cast<float>(lastY - ypos); // Reverse Y
 	lastX = static_cast<float>(xpos);
 	lastY = static_cast<float>(ypos);
 
@@ -60,7 +60,7 @@ void InputManager::handleCursor(GLFWwindow* window)
 		if (cursorVisible) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			cursorVisible = false;
-			firstMouse = true; // ÷ÿ÷√£¨±‹√‚Ã¯‘æ
+			firstMouse = true; // Reset to avoid jumping
 		}
 	}
 }

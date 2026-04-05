@@ -35,7 +35,9 @@ public:
 		lastGeometryWriteTime= std::filesystem::last_write_time(geometryPath);
 	}
 
-	// 新增：尝试热重载，若成功返回 true（替换程序）；失败或未修改返回 false
+	// Added: Attempt hot reload;
+	// returns true (replaces the program) if successful;
+	// returns false if it fails or no changes are made.
 	bool reload();
 
 private:

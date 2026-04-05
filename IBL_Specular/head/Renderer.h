@@ -106,7 +106,8 @@ private:
 	bool usePostProcess = false;
 	bool drawLights = false;
 	bool drawPlane = false;
-	
+	bool drawDebug = false;
+
 	int framebufferWidth;
 	int framebufferHeight;
 	unsigned int finalTexture = 0;

@@ -44,7 +44,7 @@ public:
         return nullptr;
     }
 
-    // 新增：按名重载单个 shader（在有 GL context 的线程调用）
+    // Reload a single shader by name (called in a thread with a GL context)
     bool ReloadShader(const std::string& name) {
         auto it = shaders.find(name);
         if (it == shaders.end()) {
@@ -55,7 +55,7 @@ public:
         return it->second->reload();
     }
 
-    // 新增：重载所有已加载的 shader，返回每个 shader 的重载结果
+    // Reloads all loaded shaders and returns the reload result for each shader.
     std::vector<std::pair<std::string, bool>> ReloadAllShaders() {
         std::vector<std::pair<std::string, bool>> results;
         results.reserve(shaders.size());
@@ -78,7 +78,7 @@ public:
         return tex;
     }
 
-    // 新增：替换/重载纹理（返回新 shared_ptr）
+    // Replace/reload texture (returns a new shared_ptr)
     std::shared_ptr<Texture> ReloadTexture(const std::string& path, TextureType type = Diffuse) {
         auto tex = std::make_shared<Texture>(path, type);
         textures[path] = tex;
@@ -94,11 +94,11 @@ public:
         return model;
     }
 
-    // 新增：按路径在已有 Model 实例上重载（若已 load 则调用 model->reload；若未 load 则 LoadModel）
+    // Reload on an existing Model instance by path (if already loaded, call model->reload; if not loaded, call LoadModel).
     bool ReloadModel(const std::string& path) {
         auto it = models.find(path);
         if (it == models.end()) {
-            // 尚未加载，直接加载并返回是否成功
+            // Loading not yet, load directly and return whether it was successful.
             try {
                 auto model = std::make_shared<Model>(path);
                 models[path] = model;
@@ -108,7 +108,7 @@ public:
             }
         } else {
             if (!it->second) return false;
-            // 调用 Model::reload（需要 Model 提供该方法）
+            // Call Model::reload (this method needs to be provided by the Model).
             it->second->reload(path);
             return true;
         }

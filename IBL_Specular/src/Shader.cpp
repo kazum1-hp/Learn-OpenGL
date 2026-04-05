@@ -38,7 +38,6 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, c
 		vertexCode = vShaderStream.str();
 		fragmentCode = fShaderStream.str();
 		
-		// 修复：不能将 std::string 与 nullptr 比较，改为检查是否为空
 		if (!geometryPath.empty())
 		{
 			gShaderFile.open(geometryPath);
@@ -123,10 +122,10 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 	}
 }
 
-// 新增：热重载实现
+// Added: Hot reload implementation
 bool Shader::reload()
 {
-	// 先检查文件最后写入时间，有任何一个文件变化则尝试重载
+	// Check the last write time of the file, if any file has changed, attempt to reload.
 	std::filesystem::file_time_type vtime, ftime, gtime;
 	bool hasGeometry = !geometryPath.empty();
 	try {
@@ -139,11 +138,11 @@ bool Shader::reload()
 	}
 
 	if (vtime == lastVertexWriteTime && ftime == lastFragmentWriteTime && (!hasGeometry || gtime == lastGeometryWriteTime)) {
-		// 未修改
+		// Unmodified
 		return false;
 	}
 
-	// 读取新源码
+	// Read new source code
 	std::string vertexCode;
 	std::string fragmentCode;
 	std::string geometryCode;
@@ -179,7 +178,7 @@ bool Shader::reload()
 	const char* vShaderCode = vertexCode.c_str();
 	const char* fShaderCode = fragmentCode.c_str();
 
-	// 创建 & 编译新 shader
+	// Creating & compiling a new shader
 	GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
 	GLuint geometry = 0;
@@ -225,7 +224,7 @@ bool Shader::reload()
 		}
 	}
 
-	// 链接新程序
+	// Link to new program
 	GLuint newProgram = glCreateProgram();
 	glAttachShader(newProgram, vertex);
 	glAttachShader(newProgram, fragment);
@@ -237,7 +236,7 @@ bool Shader::reload()
 		char infoLog[1024];
 		glGetProgramInfoLog(newProgram, 1024, NULL, infoLog);
 		std::cout << "ERROR::SHADER::RELOAD::PROGRAM_LINKING_FAILED\n" << infoLog << std::endl;
-		// 清理
+		// Delete
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
 		if (hasGeometry) glDeleteShader(geometry);
@@ -245,16 +244,16 @@ bool Shader::reload()
 		return false;
 	}
 
-	// 链接成功：替换旧 program
-	glDeleteProgram(ID); // 删除旧程序
+	// Link successful: Replace old program
+	glDeleteProgram(ID); // Delete old program
 	ID = newProgram;
 
-	// 删除 shaders（已 attach 并已链接）
+	// Delete shaders (already attached and linked)
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
 	if (hasGeometry) glDeleteShader(geometry);
 
-	// 清空 uniform 缓存并更新写入时间
+	// Clear uniform cache and update write time
 	uniformCache.clear();
 	lastVertexWriteTime = vtime;
 	lastFragmentWriteTime = ftime;

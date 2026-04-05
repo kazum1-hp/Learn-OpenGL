@@ -9,7 +9,7 @@
 #include <windows.h> // for MultiByteToWideChar
 #include <fstream>
 #include <vector>
-#include <filesystem> // 新增，用于检查文件存在性
+#include <filesystem>
 
 Texture::Texture(const std::string& path, TextureType typeName)
 	: path(path), type(typeName)
@@ -40,12 +40,12 @@ Texture::Texture(const std::string& path, TextureType typeName)
 	std::wstring wpath(wlen, L'\0');
 	MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, &wpath[0], wlen);
 
-	// 调试输出：打印将尝试打开的路径（宽字符）
+	// Debug output: Prints the path (wide characters) that will be attempted to be opened.
 	std::wcout.imbue(std::locale(""));
 	std::wcout << L"[Texture] Trying to open (wpath): " << wpath << std::endl;
 	std::cout << "[Texture] trying to open (utf8): " << path << std::endl;
 
-	// 使用 filesystem 检查文件是否存在（帮助诊断）
+	// Use the filesystem tool to check if a file exists (to aid in diagnosis).
 	try {
 		std::filesystem::path fp = std::filesystem::path(wpath);
 		if (!std::filesystem::exists(fp)) {
@@ -54,7 +54,7 @@ Texture::Texture(const std::string& path, TextureType typeName)
 		}
 	} catch (const std::exception& e) {
 		std::cout << "Filesystem check exception: " << e.what() << " for path: " << path << std::endl;
-		// 继续尝试用 ifstream 打开
+		// Continue trying to open with ifstream
 	}
 
 	// read file to memory by using ifstream

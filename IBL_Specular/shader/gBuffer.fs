@@ -1,8 +1,9 @@
 #version 330 core
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
-layout (location = 2) out vec4 gAlbedoSpec;
-layout (location = 3) out vec3 gGeoNormal;
+layout (location = 2) out vec3 gAlbedo;
+layout (location = 3) out vec3 gARM; // occlusion, roughness, metallic
+layout (location = 4) out vec3 gGeoNormal;
 
 in VS_OUT{
 	vec2 TexCoords;
@@ -16,9 +17,16 @@ uniform sampler2D diffuse;
 uniform sampler2D specular;
 uniform sampler2D normal;
 uniform sampler2D height;
+uniform sampler2D arm;
+
 uniform bool hasNormalMap;
 uniform bool hasHeightMap;
+uniform bool hasARMMap;
 uniform float height_scale;
+
+uniform float aoBias;
+uniform float roughnessBias;
+uniform float metallicBias;
 
 uniform vec3 viewPos;
 
@@ -50,19 +58,33 @@ void main()
 	{
 		vec3 normalTex = texture(normal, texCoords).xyz;
 		normalTex = normalTex * 2.0 - 1.0;
-		// 如果 Y 通道反了：
+		// If the Y channel is reversed:
 		//normalTex.y = -normalTex.y;
 		norm = normalize(TBN * normalTex);
 	}
 
-    // 存储第一个G缓冲纹理中的片段位置向量
+    // position
     gPosition = fs_in.FragPos;
-    // 同样存储对每个逐片段法线到G缓冲中
+    // normal (used for lighting)
     gNormal = norm;
-    // 和漫反射对每个逐片段颜色
-    gAlbedoSpec.rgb = texture(diffuse, texCoords).rgb;
-    // 存储镜面强度到gAlbedoSpec的alpha分量
-    gAlbedoSpec.a = texture(specular, texCoords).r;
+    // albedo
+    gAlbedo = texture(diffuse, texCoords).rgb;
+
+    // ORM: occlusion, roughness, metallic
+    float ao = 1.0;
+    float roughness = 0.5;
+    float metallic = 0.0;
+
+    if (hasARMMap)
+    {
+        vec3 armVal = texture(arm, texCoords).rgb;
+        ao = clamp(armVal.r + aoBias, 0.01, 1.0);
+        roughness = clamp(armVal.g + roughnessBias, 0.01, 1.0);
+        metallic = clamp(armVal.b + metallicBias, 0.01, 1.0);
+    }
+
+    gARM = vec3(ao, roughness, metallic);
+
     // shadow calculate normal
     gGeoNormal = N;
 }  

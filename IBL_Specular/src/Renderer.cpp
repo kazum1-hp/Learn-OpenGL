@@ -11,7 +11,7 @@
 static inline void SafeCopyPath(char* dest, size_t destSize, const std::string& src)
 {
     if (dest == nullptr || destSize == 0) return;
-    // 使用 snprintf 执行安全拷贝并保证 null-terminate
+    // Use snprintf to perform a safe copy and ensure null-terminate
     std::snprintf(dest, destSize, "%s", src.c_str());
     dest[destSize - 1] = '\0';
 }
@@ -27,7 +27,7 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene)
 
     framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/true, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/useHdr, 2));
     framebuffers.push_back(std::make_unique<FrameBuffer>(SHADOW_Size, SHADOW_Size, false, false, true, false, false));
-    framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/false, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/true, 4, /*useGbuffer*/true));
+    framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/false, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/true, 5, /*useGbuffer*/true));
     framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/true, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/useHdr, 2));
     framebuffers.push_back(std::make_unique<FrameBuffer>(window, /*useDepth*/true, /*useMs*/false, /*useDepthMap2D*/false, /*useDepthCube*/false, /*useHdr*/false));
 
@@ -113,11 +113,16 @@ void Renderer::init()
     lightPassShader->use();
     lightPassShader->setUniform("gPosition", 0);
     lightPassShader->setUniform("gNormal", 1);
-    lightPassShader->setUniform("gAlbedoSpec", 2);
-    lightPassShader->setUniform("gGeoNormal", 3);
-    lightPassShader->setUniform("gDepth", 4);
+    lightPassShader->setUniform("gAlbedo", 2);
+    lightPassShader->setUniform("gARM", 3); // ao,roughness,metallic packed
+    lightPassShader->setUniform("gGeoNormal", 4);
+    lightPassShader->setUniform("gDepth", 5);
 
-    lightPassShader->setUniform("material.shininess", res.GetMaterial("material")->getShininess());
+    // IBL samplers
+    lightPassShader->setUniform("irradianceMap", 11);
+    lightPassShader->setUniform("prefilterMap", 12);
+    lightPassShader->setUniform("brdfLUT", 13);
+
     for (int i = 0; i < scene.GetPointLights().size(); i++)
     {
         std::string base = "pointLight[" + std::to_string(i) + "]";
@@ -412,7 +417,6 @@ void Renderer::forwardPass(Scene& scene)
 
     FrameBuffer& parallelShadowFrameBuffer = *framebuffers[1];
 
-    auto& env = scene.GetEnvironment();
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[0]->getFBO());
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -432,9 +436,9 @@ void Renderer::forwardPass(Scene& scene)
     modelShader->setUniform("viewPos", camera.getPosition());
 
     // light 
-    modelShader->setUniform("useBlinnPhong", useBlinnPhong);
+    //modelShader->setUniform("useBlinnPhong", useBlinnPhong);
     modelShader->setUniform("useQuadratic", useQuadratic);
-    modelShader->setUniform("modelLight", modelLight);
+    //modelShader->setUniform("modelLight", modelLight);
 
     // paralleLight
     modelShader->setUniform("parallelLight.color", scene.GetDirLight().getColor());
@@ -492,6 +496,7 @@ void Renderer::forwardPass(Scene& scene)
         glEnable(GL_CULL_FACE);
     }
 
+    auto& env = scene.GetEnvironment();
     glActiveTexture(GL_TEXTURE9);
     glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.irradianceMap);
     glActiveTexture(GL_TEXTURE10);
@@ -629,19 +634,35 @@ void Renderer::geometryPass(Scene& scene)
     gBufferShader->setUniform("projection", camera.getProjectionMatrix());
     gBufferShader->setUniform("viewPos", camera.getPosition());
 
-    /*drawMesh(*plane, *gBufferShader);
-    gBufferShader->setUniform("model", model);
-    gBufferShader->setUniform("hasNormalMap", false);
-    gBufferShader->setUniform("hasHeightMap", false);
-    glDisable(GL_CULL_FACE);
-    plane->draw();
-    glEnable(GL_CULL_FACE);*/
+    // PBR / ORM settings
+    gBufferShader->setUniform("aoBias", aoBias);
+    gBufferShader->setUniform("roughnessBias", roughnessBias);
+    gBufferShader->setUniform("metallicBias", metallicBias);
+
+    // Per-mesh flags handled in drawModel/drawMesh, but set global toggles here
+    gBufferShader->setUniform("hasNormalMap", hasNormal);
+    gBufferShader->setUniform("hasHeightMap", hasHeight);
+    gBufferShader->setUniform("hasARMMap", true); // assume models may provide ARM map; drawMesh will bind when present
+    gBufferShader->setUniform("height_scale", height_scale);
+
+    if (drawPlane)
+    {
+        drawMesh(*plane, *gBufferShader);
+        gBufferShader->setUniform("model", model);
+        gBufferShader->setUniform("hasNormalMap", false);
+        gBufferShader->setUniform("hasHeightMap", false);
+        gBufferShader->setUniform("hasARMMap", false);
+        glDisable(GL_CULL_FACE);
+        plane->draw();
+        glEnable(GL_CULL_FACE);
+    }
 
     for (const auto& obj : scene.GetObjects()) {
         drawModel(*obj.model, *gBufferShader);
         gBufferShader->setUniform("hasNormalMap", hasNormal);
         gBufferShader->setUniform("hasHeightMap", hasHeight);
         gBufferShader->setUniform("height_scale", height_scale);
+        gBufferShader->setUniform("hasARMMap", true);
         renderModel(obj.transform, *obj.model, *gBufferShader);
     }
 
@@ -659,8 +680,9 @@ void Renderer::lightPass(Scene& scene)
     GLuint gBuffer = gFrameBuffer.getFBO();
     GLuint gPosition = gFrameBuffer.getColor(0);
     GLuint gNormal = gFrameBuffer.getColor(1);
-    GLuint gAlbedoSpec = gFrameBuffer.getColor(2);
-    GLuint gGeoNormal = gFrameBuffer.getColor(3);
+    GLuint gAlbedo = gFrameBuffer.getColor(2);
+    GLuint gARM = gFrameBuffer.getColor(3);
+    GLuint gGeoNormal = gFrameBuffer.getColor(4);
     GLuint gDepth = gFrameBuffer.getGDepth();
 
     glBindFramebuffer(GL_FRAMEBUFFER, lightPassFrameBuffer.getFBO());
@@ -674,102 +696,117 @@ void Renderer::lightPass(Scene& scene)
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, gNormal);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    glBindTexture(GL_TEXTURE_2D, gAlbedo);
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, gGeoNormal);
+    glBindTexture(GL_TEXTURE_2D, gARM);
     glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, gGeoNormal);
+    glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, gDepth);
 
     // uniform settings
     lightPassShader->setUniform("viewPos", camera.getPosition());
     // light 
-    lightPassShader->setUniform("useBlinnPhong", useBlinnPhong);
+    //lightPassShader->setUniform("useBlinnPhong", useBlinnPhong);
     lightPassShader->setUniform("useQuadratic", useQuadratic);
-    lightPassShader->setUniform("modelLight", modelLight);
+    //lightPassShader->setUniform("modelLight", modelLight);
 
     // paralleLight
-    lightPassShader->setUniform("parallelLight.ambient", scene.GetDirLight().getAmbient() * scene.GetDirLight().getColor());
-    lightPassShader->setUniform("parallelLight.diffuse", scene.GetDirLight().getDiffuse() * scene.GetDirLight().getColor());
-    lightPassShader->setUniform("parallelLight.specular", scene.GetDirLight().getSpecular() * scene.GetDirLight().getColor());
+    lightPassShader->setUniform("parallelLight.color", scene.GetDirLight().getColor());
     lightPassShader->setUniform("parallelLight.direction", scene.GetDirLight().getLightDir());
+    lightPassShader->setUniform("parallelLight.intensity", scene.GetDirLight().getIntensity());
     lightPassShader->setUniform("parallelLight.enabled", input.isParallelLightOn());
     lightPassShader->setUniform("lightSpaceMatrix", LightSpaceMatrix);
     lightPassShader->setUniform("parallelShadows", parallelShadows);
+    lightPassShader->setUniform("pointShadows", pointShadows);
 
-    if (input.isParallelLightOn())
+    if (useShadows)
     {
-        pointShadows = false;
+        if (input.isParallelLightOn())
+        {
+            pointShadows = false;
+            parallelShadows = true;
+            glActiveTexture(GL_TEXTURE6);
+            glBindTexture(GL_TEXTURE_2D, parallelShadowFrameBuffer.getDepth2D());
 
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_2D, parallelShadowFrameBuffer.getDepth2D());
-
-        lightPassShader->setUniform("depthMap", 5);
+            lightPassShader->setUniform("depthMap", 0);
+        }
+        else pointShadows = true;
     }
-    else pointShadows = true;
 
     //point light
-    lightPassShader->setUniform("pointShadows", pointShadows);
 
     for (int i = 0; i < scene.GetPointLights().size(); i++)
     {
         std::string base = "pointLight[" + std::to_string(i) + "]";
 
-        lightPassShader->setUniform(base + ".ambient", scene.GetPointLights()[i].getAmbient() * scene.GetPointLights()[i].getColor());
-        lightPassShader->setUniform(base + ".diffuse", scene.GetPointLights()[i].getDiffuse() * scene.GetPointLights()[i].getColor());
-        lightPassShader->setUniform(base + ".specular", scene.GetPointLights()[i].getSpecular() * scene.GetPointLights()[i].getColor());
+        lightPassShader->setUniform(base + ".color", scene.GetPointLights()[i].getColor());
         lightPassShader->setUniform(base + ".position", scene.GetPointLights()[i].getLightPos());
+        lightPassShader->setUniform(base + ".intensity", scene.GetPointLights()[i].getIntensity());
         lightPassShader->setUniform(base + ".enabled", scene.GetPointLights()[i].lightOn() && input.isPointLightOn());
         lightPassShader->setUniform("far_plane", scene.GetPointLights()[i].getFar());
 
-        if (input.isPointLightOn())
+        if (input.isPointLightOn() && useShadows)
         {
-            glActiveTexture(GL_TEXTURE6 + i);
+            glActiveTexture(GL_TEXTURE7 + i);
             glBindTexture(GL_TEXTURE_CUBE_MAP, pointShadowFramebuffers[i]->getDepthCube());
 
-            lightPassShader->setUniform("shadowMap[" + std::to_string(i) + "]", 6 + i);
+            lightPassShader->setUniform("shadowMap[" + std::to_string(i) + "]", 1 + i);
         }
     }
+
+    // bind IBL environment maps (same units as modelShader)
+    auto& env = scene.GetEnvironment();
+    glActiveTexture(GL_TEXTURE11);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.irradianceMap);
+    glActiveTexture(GL_TEXTURE12);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.prefilterMap);
+    glActiveTexture(GL_TEXTURE13);
+    glBindTexture(GL_TEXTURE_2D, env.maps.brdfLUT);
+
     // screen quad draw
     screenQuad->draw();
     //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lightPassFrameBuffer.getFBO());
-    glBlitFramebuffer(0, 0, window.getWidth(), window.getHeight(),
-                      0, 0, window.getWidth(), window.getHeight(),
+    glBlitFramebuffer(0, 0, framebufferWidth, framebufferHeight,
+                      0, 0, framebufferWidth, framebufferHeight,
                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, lightPassFrameBuffer.getFBO());
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // lightCube draw
-    lightShader->use();
-
-    // transform matrix
-    lightShader->setUniform("view", camera.getViewMatrix());
-    lightShader->setUniform("projection", camera.getProjectionMatrix());
-
-    for (int i = 0; i < scene.GetPointLights().size(); i++)
+    if (drawLights)
     {
-        glm::mat4 lightModel(1.0f);
-        lightModel = glm::translate(model, scene.GetPointLights()[i].getLightPos());
-        lightModel = glm::scale(lightModel, glm::vec3(0.25f));
-        lightShader->setUniform("model", lightModel);
-        lightShader->setUniform("lightColor", scene.GetPointLights()[i].getColor());
-        lightShader->setUniform("enabled", scene.GetPointLights()[i].lightOn() && input.isPointLightOn());
-        if (scene.GetPointLights()[i].lightOn() && input.isPointLightOn())
+        lightShader->use();
+
+        // transform matrix
+        lightShader->setUniform("view", camera.getViewMatrix());
+        lightShader->setUniform("projection", camera.getProjectionMatrix());
+
+        for (int i = 0; i < scene.GetPointLights().size(); i++)
         {
-            cube->draw();
+            glm::mat4 lightModel(1.0f);
+            lightModel = glm::translate(model, scene.GetPointLights()[i].getLightPos());
+            lightModel = glm::scale(lightModel, glm::vec3(0.25f));
+            lightShader->setUniform("model", lightModel);
+            lightShader->setUniform("lightColor", scene.GetPointLights()[i].getColor());
+            lightShader->setUniform("enabled", scene.GetPointLights()[i].lightOn() && input.isPointLightOn());
+            if (scene.GetPointLights()[i].lightOn() && input.isPointLightOn())
+            {
+                cube->draw();
+            }
         }
     }
 
     glDisable(GL_CULL_FACE); // or glCullFace(GL_FRONT)
-    auto& env = scene.GetEnvironment();
 
     backgroundShader->use();
     backgroundShader->setUniform("view", camera.getViewMatrix());
     backgroundShader->setUniform("projection", camera.getProjectionMatrix());
-    backgroundShader->setUniform("usePost", usePostProcess);
+    backgroundShader->setUniform("usePost", true);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, env.maps.envCubemap);
     cube->draw();
@@ -778,36 +815,38 @@ void Renderer::lightPass(Scene& scene)
 
     glDisable(GL_DEPTH_TEST);
 
-    int debugH = window.getHeight() / 4;
-    int debugW = debugH * static_cast<int>(camera.aspect);
+    if (drawDebug)
+    {
+        int debugH = framebufferHeight / 4;
+        int debugW = debugH * static_cast<int>(camera.aspect);
 
-    //Shader& debugShader = *shaders[10];
-    gbufferDebugShader->use();
-    glBindVertexArray(screenQuad->getVAO());
+        gbufferDebugShader->use();
+        glBindVertexArray(screenQuad->getVAO());
 
-    auto drawDebug = [&](GLuint tex, int index)
-        {
-            glViewport(
-                0,                  // x
-                window.getHeight() - (index + 1) * debugH,  // y（The OpenGL origin of the coordinate axis is in the lower left corner.）
-                debugW,
-                debugH
-            );
+        auto drawDebug = [&](GLuint tex, int index)
+            {
+                glViewport(
+                    0,                  // x
+                    framebufferHeight - (index + 1) * debugH,  // y（The OpenGL origin of the coordinate axis is in the lower left corner.）
+                    debugW,
+                    debugH
+                );
 
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, tex);
-            gbufferDebugShader->setUniform("debugTex", 0);
-            gbufferDebugShader->setUniform("u_DebugMode", index);
-            gbufferDebugShader->setUniform("fov", camera.getFov());
-            gbufferDebugShader->setUniform("nearPlane", camera.getNearPlane());
-            gbufferDebugShader->setUniform("farPlane", camera.getFarPlane());
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-        };
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, tex);
+                gbufferDebugShader->setUniform("debugTex", 0);
+                gbufferDebugShader->setUniform("u_DebugMode", index);
+                gbufferDebugShader->setUniform("fov", camera.getFov());
+                gbufferDebugShader->setUniform("nearPlane", camera.getNearPlane());
+                gbufferDebugShader->setUniform("farPlane", camera.getFarPlane());
+                glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+            };
 
-    drawDebug(gPosition, 0);
-    drawDebug(gNormal, 1);
-    drawDebug(gAlbedoSpec, 2);
-    drawDebug(gDepth, 3);
+        drawDebug(gNormal, 0);
+        drawDebug(gARM, 1);
+        drawDebug(gARM, 2);
+        drawDebug(gDepth, 3);
+    }
 
     glViewport(0, 0, framebufferWidth, framebufferHeight);
     glEnable(GL_DEPTH_TEST);
@@ -922,15 +961,17 @@ void Renderer::onImGuiRender()
             ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
             ImGuiID dock_main_id = dockspace_id;
-            ImGuiID left_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.25f, nullptr, &dock_main_id);
-            ImGuiID bottom_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.25f, nullptr, &dock_main_id);
+            ImGuiID left_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.20f, nullptr, &dock_main_id);
+            ImGuiID left_top_id = 0;
+            ImGuiID left_bottom_id = ImGui::DockBuilderSplitNode(left_id, ImGuiDir_Down, 0.5f, nullptr, &left_top_id);
+            ImGuiID bottom_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, nullptr, &dock_main_id);
 
             // Dock windows by exact names used below
-            ImGui::DockBuilderDockWindow("Light Control", left_id);
-            ImGui::DockBuilderDockWindow("Renderer Settings", left_id);
-            ImGui::DockBuilderDockWindow("Post Processing", left_id);
+            ImGui::DockBuilderDockWindow("Light Control", left_top_id);
+            ImGui::DockBuilderDockWindow("Renderer Settings", left_bottom_id);
+            ImGui::DockBuilderDockWindow("Post Processing", left_bottom_id);
             ImGui::DockBuilderDockWindow("Scene", dock_main_id);
-            ImGui::DockBuilderDockWindow("Shaders", bottom_id);
+            ImGui::DockBuilderDockWindow("Reload Shaders", bottom_id);
             ImGui::DockBuilderDockWindow("Hot Reload Assets", bottom_id);
 
             ImGui::DockBuilderFinish(dockspace_id);
@@ -973,7 +1014,7 @@ void Renderer::onImGuiRender()
         {
             ImGui::SliderFloat("Offset", &offset, 100.0f, 1000.0f);
         }
-        ImGui::SliderFloat("Scan Pos", &scanPos, 0.0f, static_cast<float>(window.getWidth()));
+        ImGui::SliderFloat("Scan Pos", &scanPos, 0.0f, static_cast<float>(framebufferWidth));
     }
 
     ImGui::End();
@@ -987,13 +1028,15 @@ void Renderer::onImGuiRender()
 
     ImGui::Checkbox("useNormal", &hasNormal);
     ImGui::SameLine();
-    ImGui::Checkbox("useDeferred", &useDeferred);
-    ImGui::SameLine();
     ImGui::Checkbox("useShadow", &useShadows);
+    ImGui::SameLine();
+    ImGui::Checkbox("useDeferred", &useDeferred);
 
     ImGui::Checkbox("drawLights", &drawLights);
     ImGui::SameLine();
     ImGui::Checkbox("drawPlane", &drawPlane);
+    ImGui::SameLine();
+    ImGui::Checkbox("drawDebug", &drawDebug);
 
     if (!scene.GetObjects().empty())
         scene.GetObjects()[0].transform.onImGuiRender();
@@ -1001,7 +1044,7 @@ void Renderer::onImGuiRender()
     ImGui::End();
 
     // --- Shader reload panel (keep separate for clarity) ---
-    ImGui::Begin("Shaders");
+    ImGui::Begin("Reload Shaders");
     static std::string lastReloadMsg = "Idle";
 
     if (ImGui::Button("Reload Shaders")) {
@@ -1043,10 +1086,13 @@ void Renderer::onImGuiRender()
                 lightPassShader->use();
                 lightPassShader->setUniform("gPosition", 0);
                 lightPassShader->setUniform("gNormal", 1);
-                lightPassShader->setUniform("gAlbedoSpec", 2);
-                lightPassShader->setUniform("gGeoNormal", 3);
-                lightPassShader->setUniform("gDepth", 4);
-                lightPassShader->setUniform("material.shininess", ResourceManager::GetInstance().GetMaterial("material")->getShininess());
+                lightPassShader->setUniform("gAlbedo", 2);
+                lightPassShader->setUniform("gARM", 3);
+                lightPassShader->setUniform("gGeoNormal", 4);
+                lightPassShader->setUniform("gDepth", 5);
+                lightPassShader->setUniform("irradianceMap", 11);
+                lightPassShader->setUniform("prefilterMap", 12);
+                lightPassShader->setUniform("brdfLUT", 13);
                 for (int i = 0; i < static_cast<int>(scene.GetPointLights().size()); ++i) {
                     std::string base = "pointLight[" + std::to_string(i) + "]";
                     lightPassShader->setUniform(base + ".constant", 1.0f);
@@ -1084,18 +1130,18 @@ void Renderer::onImGuiRender()
     ImGui::InputText("Model Path", modelPathBuf, sizeof(modelPathBuf));
     //ImGui::SameLine();
     if (ImGui::Button("Browse Model...")) {
-        // 准备一个 FileDialogConfig 并设置 path
+        // Prepare a FileDialogConfig and set the path
         IGFD::FileDialogConfig cfg;
-        cfg.path = "."; // 起始目录（可改为其他）
+        cfg.path = "."; // starting directory (can be changed)
 
-        // 打开文件对话框
+        // Open file dialog
         ImGuiFileDialog::Instance()->OpenDialog("ChooseModelDlg", "Choose Model", ".gltf,.glb", cfg);
     }
 
     // Display model file dialog and auto-load on selection
     if (ImGuiFileDialog::Instance()->Display("ChooseModelDlg")) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
-            std::string chosen = ImGuiFileDialog::Instance()->GetFilePathName(); // 注意大小写
+            std::string chosen = ImGuiFileDialog::Instance()->GetFilePathName();
             SafeCopyPath(modelPathBuf, sizeof(modelPathBuf), chosen);
             modelPathBuf[sizeof(modelPathBuf)-1] = '\0';
 
@@ -1195,12 +1241,51 @@ void Renderer::onImGuiRender()
 
     if (finalTexture != 0)
     {
+        ImVec2 imagePos = ImGui::GetCursorScreenPos();
+
         ImGui::Image(
             (ImTextureID)(intptr_t)finalTexture,
             size,
-            ImVec2(0, 1),   // 翻转
+            ImVec2(0, 1),   // flip vertically
             ImVec2(1, 0)
-        );
+        ); 
+        if (drawDebug && useDeferred)
+        {
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+            const char* labels[] = {
+                "Normal",
+                "Roughness",
+                "Metallic",
+                "Depth"
+            };
+
+            float debugH = size.y / 4.0f;
+            float padding = 6.0f;
+
+            for (int i = 0; i < 4; i++)
+            {
+                float x = imagePos.x + 10.0f;
+                float y = imagePos.y + i * debugH + 10.0f;
+
+                // background (clearer/readable)
+                ImVec2 bgMin(x - padding, y - padding);
+                ImVec2 bgMax(x + 75.0f, y + 18.0f);
+
+                drawList->AddRectFilled(
+                    bgMin,
+                    bgMax,
+                    IM_COL32(0, 0, 0, 150)
+                );
+
+                // text
+                drawList->AddText(
+                    ImVec2(x, y),
+                    IM_COL32(255, 255, 0, 255),
+                    labels[i]
+                );
+            }
+        }
     }
     else
     {
