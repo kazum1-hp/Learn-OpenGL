@@ -49,18 +49,18 @@ Texture::Texture(const std::string& path, TextureType typeName)
 	try {
 		std::filesystem::path fp = std::filesystem::path(wpath);
 		if (!std::filesystem::exists(fp)) {
-			std::cout << "Failed to open texture file (not found): " << path << std::endl;
+			std::cerr << "Failed to open texture file (not found): " << path << std::endl;
 			return;
 		}
 	} catch (const std::exception& e) {
-		std::cout << "Filesystem check exception: " << e.what() << " for path: " << path << std::endl;
+		std::cerr << "Filesystem check exception: " << e.what() << " for path: " << path << std::endl;
 		// Continue trying to open with ifstream
 	}
 
 	// read file to memory by using ifstream
 	std::ifstream file(wpath, std::ios::binary | std::ios::ate);
 	if (!file) {
-		std::cout << "Failed to open texture file: " << path << std::endl;
+		std::cerr << "Failed to open texture file: " << path << std::endl;
 		return;
 	}
 
@@ -68,7 +68,7 @@ Texture::Texture(const std::string& path, TextureType typeName)
 	file.seekg(0, std::ios::beg);
 	std::vector<unsigned char> buffer(size);
 	if (!file.read((char*)buffer.data(), size)) {
-		std::cout << "Failed to read texture file: " << path << std::endl;
+		std::cerr << "Failed to read texture file: " << path << std::endl;
 		return;
 	}
 
@@ -107,13 +107,13 @@ Texture::Texture(const std::string& path, TextureType typeName)
 			else { internalformat = GL_RGBA; type = GL_UNSIGNED_BYTE; }
 			format = GL_RGBA;
 
-			glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, data);
 		}
 
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		std::cerr << "Loading texture: " << path << " ID: " << ID << " texType: " << typeName << std::endl;
-		//std::cerr << "Size: " << width << "x" << height << ", Channels: " << nrChannels << std::endl;
+		std::cout << "Loading texture: " << path << " ID: " << ID << " texType: " << typeName << std::endl;
+		//std::cout << "Size: " << width << "x" << height << ", Channels: " << nrChannels << std::endl;
 	}
 
 	else

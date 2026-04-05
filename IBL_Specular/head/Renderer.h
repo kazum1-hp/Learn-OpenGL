@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <memory>
+#include <sstream>
 
 class Scene;
 struct Environment;
@@ -56,6 +57,8 @@ private:
 	std::shared_ptr<Mesh> screenQuad;
 	std::shared_ptr<Mesh> plane;
 	std::shared_ptr<Mesh> cube;
+
+	static std::stringstream buffer;
 
 	glm::mat4 LightSpaceMatrix;
 
@@ -131,6 +134,7 @@ public:
 	Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene);
 	void init();
 	void render(Scene& scene);
+	static void InitConsole();
 	void onImGuiRender();
 };
 

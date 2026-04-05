@@ -50,6 +50,8 @@ Renderer::Renderer(Camera& cam, InputManager& input, Window& win, Scene& scene)
 
 void Renderer::init()
 {
+    InitConsole();
+
     // 1. Get ResourceManager instance
     auto& res = ResourceManager::GetInstance();
 
@@ -927,6 +929,19 @@ void Renderer::resizeFrameBuffer(unsigned int newWidth, unsigned int newHeight)
     framebufferHeight = newHeight;
 }
 
+std::stringstream Renderer::buffer;
+
+void Renderer::InitConsole()
+{
+    static bool initialized = false;
+    if (!initialized)
+    {
+        std::cout.rdbuf(buffer.rdbuf());
+        std::cerr.rdbuf(buffer.rdbuf());
+        initialized = true;
+    }
+}
+
 void Renderer::onImGuiRender()
 {
     // --- DockSpace / Layout setup (full-screen) ---
@@ -965,14 +980,17 @@ void Renderer::onImGuiRender()
             ImGuiID left_top_id = 0;
             ImGuiID left_bottom_id = ImGui::DockBuilderSplitNode(left_id, ImGuiDir_Down, 0.5f, nullptr, &left_top_id);
             ImGuiID bottom_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, nullptr, &dock_main_id);
+            ImGuiID bottom_left_id = 0;
+            ImGuiID bottom_right_id = ImGui::DockBuilderSplitNode(bottom_id, ImGuiDir_Right, 0.65f, nullptr, &bottom_left_id);
 
             // Dock windows by exact names used below
             ImGui::DockBuilderDockWindow("Light Control", left_top_id);
             ImGui::DockBuilderDockWindow("Renderer Settings", left_bottom_id);
             ImGui::DockBuilderDockWindow("Post Processing", left_bottom_id);
             ImGui::DockBuilderDockWindow("Scene", dock_main_id);
-            ImGui::DockBuilderDockWindow("Reload Shaders", bottom_id);
-            ImGui::DockBuilderDockWindow("Hot Reload Assets", bottom_id);
+            ImGui::DockBuilderDockWindow("Reload Shaders", bottom_left_id);
+            ImGui::DockBuilderDockWindow("Reload Assets", bottom_left_id);
+            ImGui::DockBuilderDockWindow("Console", bottom_right_id);
 
             ImGui::DockBuilderFinish(dockspace_id);
         }
@@ -980,6 +998,7 @@ void Renderer::onImGuiRender()
         ImGui::End(); // End MainDockSpace
     }
 
+    // --------------------- Light Control --------------------------
     ImGui::Begin("Light Control");
 
     ImGui::Text("Point Lights");
@@ -993,6 +1012,7 @@ void Renderer::onImGuiRender()
 
     ImGui::End();
 
+    // --------------------- Post Processing --------------------------
     ImGui::Begin("Post Processing");
     ImGui::Checkbox("usePost", &usePostProcess);
 
@@ -1019,6 +1039,7 @@ void Renderer::onImGuiRender()
 
     ImGui::End();
 
+    // --------------------- Renderer Settings --------------------------
     ImGui::Begin("Renderer Settings");
 
     ImGui::SliderFloat("aoBias", &aoBias, -1.0f, 1.0f);
@@ -1043,7 +1064,7 @@ void Renderer::onImGuiRender()
 
     ImGui::End();
 
-    // --- Shader reload panel (keep separate for clarity) ---
+    // ------------------- Reload Shaders -------------------------
     ImGui::Begin("Reload Shaders");
     static std::string lastReloadMsg = "Idle";
 
@@ -1121,8 +1142,8 @@ void Renderer::onImGuiRender()
     ImGui::TextWrapped("%s", lastReloadMsg.c_str());
     ImGui::End();
 
-    // --- Hot reload assets with file browser (Model / HDR) ---
-    ImGui::Begin("Hot Reload Assets");
+    // ------------------- Hot Reload Assets ----------------------
+    ImGui::Begin("Reload Assets");
     static char modelPathBuf[1024] = "../Assets/blue_metal_plate_4k.gltf/blue_metal_plate_4k.gltf";
     static char hdrPathBuf[1024] = "../Assets/newman_cafeteria_4k.hdr";
     static std::string hotReloadMsg = "Idle";
@@ -1222,6 +1243,21 @@ void Renderer::onImGuiRender()
     ImGui::TextWrapped("%s", hotReloadMsg.c_str());
     ImGui::End();
 
+    // ------------ Console ----------------
+    ImGui::Begin("Console");
+
+    if (ImGui::Button("Clear"))
+    {
+        buffer.str("");
+        buffer.clear();
+    }
+
+    std::string output = buffer.str();
+    ImGui::TextUnformatted(output.c_str());
+
+    ImGui::End();
+
+    // ------------ Scene ----------------
     ImGui::Begin("Scene");
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 

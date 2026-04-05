@@ -43,7 +43,7 @@ Mesh::Mesh(const Geometry& geometry, const std::vector<std::shared_ptr<Texture>>
 	glBindVertexArray(0);
 
 	GLenum err = glGetError();
-	if (err != GL_NO_ERROR) std::cout << "GL error after mesh setup: " << err << "\n";
+	if (err != GL_NO_ERROR) std::cerr << "GL error after mesh setup: " << err << "\n";
 }
 
 void Mesh::draw() const

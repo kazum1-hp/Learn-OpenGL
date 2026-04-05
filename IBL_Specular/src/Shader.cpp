@@ -50,7 +50,7 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, c
 
 	catch (std::ifstream::failure& e)
 	{
-		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
+		std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
 	}
 
 	const char* vShaderCode = vertexCode.c_str();
@@ -108,7 +108,7 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 		if (!success)
 		{
 			glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-			std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+			std::cerr << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 		}
 	}
 	else
@@ -117,7 +117,7 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 		if (!success)
 		{
 			glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-			std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+			std::cerr << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 		}
 	}
 }
@@ -133,7 +133,7 @@ bool Shader::reload()
 		ftime = std::filesystem::last_write_time(fragmentPath);
 		if (hasGeometry) gtime = std::filesystem::last_write_time(geometryPath);
 	} catch (std::filesystem::filesystem_error& e) {
-		std::cout << "ERROR::SHADER::RELOAD::FILE_TIME: " << e.what() << std::endl;
+		std::cerr << "ERROR::SHADER::RELOAD::FILE_TIME: " << e.what() << std::endl;
 		return false;
 	}
 
@@ -171,7 +171,7 @@ bool Shader::reload()
 	}
 	catch (std::ifstream::failure& e)
 	{
-		std::cout << "ERROR::SHADER::RELOAD::FILE_NOT_READ: " << e.what() << std::endl;
+		std::cerr << "ERROR::SHADER::RELOAD::FILE_NOT_READ: " << e.what() << std::endl;
 		return false;
 	}
 
@@ -190,7 +190,7 @@ bool Shader::reload()
 	if (!success) {
 		char infoLog[1024];
 		glGetShaderInfoLog(vertex, 1024, NULL, infoLog);
-		std::cout << "ERROR::SHADER::RELOAD::VERTEX_COMPILATION_FAILED\n" << infoLog << std::endl;
+		std::cerr << "ERROR::SHADER::RELOAD::VERTEX_COMPILATION_FAILED\n" << infoLog << std::endl;
 		glDeleteShader(vertex);
 		return false;
 	}
@@ -201,7 +201,7 @@ bool Shader::reload()
 	if (!success) {
 		char infoLog[1024];
 		glGetShaderInfoLog(fragment, 1024, NULL, infoLog);
-		std::cout << "ERROR::SHADER::RELOAD::FRAGMENT_COMPILATION_FAILED\n" << infoLog << std::endl;
+		std::cerr << "ERROR::SHADER::RELOAD::FRAGMENT_COMPILATION_FAILED\n" << infoLog << std::endl;
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
 		return false;
@@ -216,7 +216,7 @@ bool Shader::reload()
 		if (!success) {
 			char infoLog[1024];
 			glGetShaderInfoLog(geometry, 1024, NULL, infoLog);
-			std::cout << "ERROR::SHADER::RELOAD::GEOMETRY_COMPILATION_FAILED\n" << infoLog << std::endl;
+			std::cerr << "ERROR::SHADER::RELOAD::GEOMETRY_COMPILATION_FAILED\n" << infoLog << std::endl;
 			glDeleteShader(vertex);
 			glDeleteShader(fragment);
 			glDeleteShader(geometry);
@@ -235,7 +235,7 @@ bool Shader::reload()
 	if (!success) {
 		char infoLog[1024];
 		glGetProgramInfoLog(newProgram, 1024, NULL, infoLog);
-		std::cout << "ERROR::SHADER::RELOAD::PROGRAM_LINKING_FAILED\n" << infoLog << std::endl;
+		std::cerr << "ERROR::SHADER::RELOAD::PROGRAM_LINKING_FAILED\n" << infoLog << std::endl;
 		// Delete
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
